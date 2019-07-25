@@ -2,3 +2,7 @@ line.bot:
 #  channel-token: 'xxx'
 #  channel-secret: 'xxx'
   handler.path: /callback
+
+event.handler:
+  queue.capacity: 1024
+  thread.count: 4

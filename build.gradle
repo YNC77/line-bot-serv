@@ -28,6 +28,13 @@ subprojects {
     sourceCompatibility = 1.8
     targetCompatibility = 1.8
 
+    dependencies {
+        annotationProcessor('org.projectlombok:lombok:1.18.8')
+        compileOnly('org.projectlombok:lombok:1.18.8')
+        testAnnotationProcessor('org.projectlombok:lombok:1.18.8')
+        testCompileOnly('org.projectlombok:lombok:1.18.8')
+    }
+
     task stage(dependsOn: ['build', 'clean'])
     build.mustRunAfter clean
 }
