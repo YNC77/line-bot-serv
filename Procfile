@@ -1,1 +1,1 @@
-web: java -Dserver.port=8080 -server -Xms1024m -Xmx1024m -jar application/build/libs/application-1.0-SNAPSHOT.jar
+web: java $JAVA_OPTS -Dserver.port=LINE_BOT_SERVER_PORT -Dline.bot.channelToken=$LINE_BOT_CHANNEL_TOKEN -Dline.bot.channelSecret=$LINE_BOT_CHANNEL_SECRET -jar application/build/libs/application-1.0-SNAPSHOT.jar
