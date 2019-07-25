@@ -1,3 +1,1 @@
-rootProject.name = 'line-bot-serv'
 include 'application'
-
