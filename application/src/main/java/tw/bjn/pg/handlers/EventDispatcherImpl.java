@@ -36,8 +36,13 @@ public class EventDispatcherImpl implements EventDispatcher {
 
     private void polling() {
         while(true){
-            Event messageEvent = queue.poll();
-            log.info("Get event - {}", messageEvent);
+            try {
+                Event messageEvent = queue.take();
+                log.info("Get event - {}", messageEvent);
+            } catch ( InterruptedException e ){
+                log.info("get interrupted", e);
+                break;
+            }
         }
     }
 }
