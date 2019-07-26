@@ -20,16 +20,17 @@ public class FollowController extends EnqueueController {
     }
 
     @EventMapping
-    public Message handleFollowEvent(FollowEvent event) {
+    public void handleFollowEvent(FollowEvent event) {
         log.info("event: {}", event);
         assign(event);
-        return new TextMessage("Hello");
     }
 
     @EventMapping
-    public Message handleUnFollowEvent(UnfollowEvent event) {
+    public void handleUnFollowEvent(UnfollowEvent event) {
         log.info("event: {}", event);
-        return new TextMessage("bye");
+//        return new TextMessage("bye");
+//  cannot return, it's not a reply event...
+// it will fail when sdk try to convert original event to ReplyEvent
     }
 
 }

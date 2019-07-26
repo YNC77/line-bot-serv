@@ -32,9 +32,9 @@ public class FollowEventHandler extends EventHandler<FollowEvent> {
             CompletableFuture<UserProfileResponse> profileFuture = lineMessagingClient.getProfile( event.getSource().getUserId() );
             UserProfileResponse profile = profileFuture.join();
             log.info("get profile - {}", profile);
-            pushMessage( new PushMessage(event.getSource().getUserId(), new TextMessage("Hi, "+profile.getDisplayName())) );
+            pushMessage( new PushMessage(event.getSource().getUserId(), new TextMessage("Hi again, "+profile.getDisplayName())) );
         } catch (Exception ex) {
-            log.error("error when get user profile", ex);
+            log.error("error when communicate with line server", ex);
         }
     }
 }

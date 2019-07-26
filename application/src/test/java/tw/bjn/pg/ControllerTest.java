@@ -37,7 +37,7 @@ public class ControllerTest {
                 new MessageEvent<>("token", new UserSource("U123"),
                         new TextMessageContent("id", "test text"), Instant.now()));
 
-        Message m = followController.handleFollowEvent(
+        followController.handleFollowEvent(
                 new FollowEvent( "",
                         new UserSource("U123") ,
                         Instant.now())
