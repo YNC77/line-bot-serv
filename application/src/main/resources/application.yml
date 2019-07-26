@@ -6,3 +6,8 @@ line.bot:
 event.handler:
   queue.capacity: 1024
   thread.count: 4
+
+logging:
+  level:
+    ROOT: INFO
+    tw.bjn.pg: DEBUG

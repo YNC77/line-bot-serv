@@ -3,4 +3,5 @@ dependencies {
     compile 'com.linecorp.bot:line-bot-spring-boot:2.7.0'
     compile 'org.springframework.boot:spring-boot-starter-web'
     testCompile group: 'junit', name: 'junit', version: '4.12'
+    testCompile 'org.springframework.boot:spring-boot-starter-test'
 }

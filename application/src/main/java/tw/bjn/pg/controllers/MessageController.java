@@ -13,37 +13,40 @@ import lombok.extern.slf4j.Slf4j;
 public class MessageController extends ReplyController {
 
     @EventMapping
-    public Message handleTextMessageEvent( MessageEvent<TextMessageContent> event ){
+    public Message handleTextMessageEvent(MessageEvent<TextMessageContent> event) {
         log.info("event: {}", event);
         return new TextMessage(event.getMessage().getText());
     }
 
     @EventMapping
-    public Message handleStickerMessageEvent( MessageEvent<StickerMessageContent> event ){
+    public Message handleStickerMessageEvent(MessageEvent<StickerMessageContent> event) {
         log.info("event: {}", event);
-        return new TextMessage("sticker: '"+event.getMessage().getPackageId()+"'-'"+event.getMessage().getStickerId());
+        return new TextMessage("sticker: '" + event.getMessage().getPackageId() + "'-'" + event.getMessage().getStickerId());
     }
 
     @EventMapping
-    public Message handleAudioMessageEvent( MessageEvent<AudioMessageContent> event ){
+    public Message handleAudioMessageEvent(MessageEvent<AudioMessageContent> event) {
         log.info("event: {}", event);
-        return new TextMessage(event.getMessage().getContentProvider().getOriginalContentUrl());
+        // ContentProvider may not provide resource URL for us
+        return new TextMessage(event.getMessage().getId());
     }
 
     @EventMapping
-    public Message handleImageMessageEvent( MessageEvent<ImageMessageContent> event ){
+    public Message handleImageMessageEvent(MessageEvent<ImageMessageContent> event) {
         log.info("event: {}", event);
-        return new TextMessage(event.getMessage().getContentProvider().getOriginalContentUrl());
+        // ContentProvider may not provide resource URL for us
+        return new TextMessage(event.getMessage().getId());
     }
 
     @EventMapping
-    public Message handleVideoMessageEvent( MessageEvent<VideoMessageContent> event ){
+    public Message handleVideoMessageEvent(MessageEvent<VideoMessageContent> event) {
         log.info("event: {}", event);
-        return new TextMessage(event.getMessage().getContentProvider().getOriginalContentUrl());
+        // ContentProvider may not provide resource URL for us
+        return new TextMessage(event.getMessage().getId());
     }
 
     @EventMapping
-    public Message handleFileMessageEvent( MessageEvent<FileMessageContent> event ){
+    public Message handleFileMessageEvent(MessageEvent<FileMessageContent> event) {
         log.info("event: {}", event);
         return new TextMessage(event.getMessage().getFileName());
     }

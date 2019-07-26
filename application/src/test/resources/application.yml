@@ -1,0 +1,8 @@
+line.bot:
+  channel-token: 'channel-token'
+  channel-secret: 'channel-secret'
+  handler.path: /callback
+
+event.handler:
+  queue.capacity: 1024
+  thread.count: 4

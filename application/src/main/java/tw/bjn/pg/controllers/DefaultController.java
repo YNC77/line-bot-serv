@@ -15,7 +15,7 @@ public class DefaultController extends EnqueueController{
     }
 
     @EventMapping
-    public void handleDefaultEvent( Event event ){
+    public void handleDefaultEvent(Event event) {
         assign(event);
     }
 
