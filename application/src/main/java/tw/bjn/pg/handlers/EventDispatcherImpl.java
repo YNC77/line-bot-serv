@@ -1,13 +1,10 @@
 package tw.bjn.pg.handlers;
 
-import com.fasterxml.jackson.annotation.JsonTypeName;
-import com.google.common.base.Preconditions;
 import com.linecorp.bot.model.event.Event;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.stereotype.Component;
 import tw.bjn.pg.annotations.LineEventHandler;
 import tw.bjn.pg.interfaces.EventDispatcher;
@@ -19,7 +16,7 @@ import java.util.Map;
 import java.util.concurrent.*;
 
 @Slf4j
-@LineEventHandler
+@Component
 public class EventDispatcherImpl implements EventDispatcher {
 
     private LinkedBlockingQueue<Event> queue;
