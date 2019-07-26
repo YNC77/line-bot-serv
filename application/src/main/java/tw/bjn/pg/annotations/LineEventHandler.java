@@ -11,5 +11,5 @@ import java.lang.annotation.Target;
 @Component
 @Retention(RetentionPolicy.RUNTIME)
 public @interface LineEventHandler {
-    public String value() default "default";
+    public String value() default "";
 }

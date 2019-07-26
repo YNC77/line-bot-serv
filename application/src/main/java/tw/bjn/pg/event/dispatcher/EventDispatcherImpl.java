@@ -1,4 +1,4 @@
-package tw.bjn.pg.handlers;
+package tw.bjn.pg.event.dispatcher;
 
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.google.common.base.Preconditions;
@@ -9,8 +9,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 import tw.bjn.pg.annotations.LineEventHandler;
-import tw.bjn.pg.interfaces.EventDispatcher;
-import tw.bjn.pg.interfaces.EventHandler;
+import tw.bjn.pg.interfaces.event.EventDispatcher;
+import tw.bjn.pg.interfaces.event.EventHandler;
 
 import javax.annotation.PostConstruct;
 import java.util.HashMap;
@@ -21,9 +21,9 @@ import java.util.concurrent.*;
 @Component
 public class EventDispatcherImpl implements EventDispatcher {
 
-    private LinkedBlockingQueue<Event> queue;
+    private LinkedBlockingQueue<Event> queue; // TODO: make this virtual
     private ExecutorService executorService;
-    private Map<String, EventHandler<? extends Event>> handlers;
+    private Map<String, EventHandler> handlers;
 
     @Value("${event.handler.thread.count}")
     private int THREAD_COUNT;
@@ -36,20 +36,15 @@ public class EventDispatcherImpl implements EventDispatcher {
     @Autowired
     public EventDispatcherImpl(ApplicationContext applicationContext) {
         this.applicationContext = applicationContext;
-//        // message, follow, join, postback, unfollow
-//        handlers.put( "follow", followEventHandler );
-////        handlers.put( "message", MessageEventHandler ); // need to handle sub-types
-//        handlers.put( "unknown", defaultHandler );
     }
 
     @PostConstruct
     public void init() {
-        log.debug("start init");
-         handlers = new HashMap<>();
+        handlers = new HashMap<>();
         Map<String,Object> mapHandlers = applicationContext.getBeansWithAnnotation(LineEventHandler.class);
-        handlers.forEach((beanName, beanObj)->{
-            final String type = beanObj.getClass().getAnnotation(LineEventHandler.class).value();
-            handlers.put(type, beanObj);
+        mapHandlers.forEach((beanName, beanObj)->{
+            LineEventHandler type = beanObj.getClass().getAnnotation(LineEventHandler.class);
+            handlers.put(type.value(), (EventHandler) beanObj);
             log.info("Add ({}) event handler.", type);
         });
         queue = new LinkedBlockingQueue<>(QUEUE_CAPACITY);
@@ -73,8 +68,14 @@ public class EventDispatcherImpl implements EventDispatcher {
                 JsonTypeName type = messageEvent.getClass().getAnnotation(JsonTypeName.class);
                 EventHandler handler = findSuitableHandler(type);
                 log.debug("get handler - ({}) ({})", handler, type);
-                executorService.submit(() -> handler.handle(messageEvent));
-            } catch ( RejectedExecutionException e ){
+                executorService.submit(() -> {
+                    try {
+                        handler.handle(messageEvent);
+                    } catch (Exception e) {
+                        log.error("error occurs while handling event", e);
+                    }
+                });
+            } catch ( RejectedExecutionException e ) {
                 log.error("cannot submit task", e);
             } catch ( InterruptedException e ){
                 log.info("get interrupted", e);

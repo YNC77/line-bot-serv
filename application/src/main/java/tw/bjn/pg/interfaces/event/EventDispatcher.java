@@ -1,4 +1,4 @@
-package tw.bjn.pg.interfaces;
+package tw.bjn.pg.interfaces.event;
 
 import com.linecorp.bot.model.event.Event;
 
