@@ -1,5 +1,7 @@
 package tw.bjn.pg.handlers;
 
+import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.google.common.base.Preconditions;
 import com.linecorp.bot.model.event.Event;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
