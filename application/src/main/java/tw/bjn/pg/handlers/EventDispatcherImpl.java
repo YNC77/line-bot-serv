@@ -6,7 +6,10 @@ import com.linecorp.bot.model.event.Event;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.stereotype.Component;
+import tw.bjn.pg.annotations.LineEventHandler;
 import tw.bjn.pg.interfaces.EventDispatcher;
 import tw.bjn.pg.interfaces.EventHandler;
 
@@ -16,12 +19,12 @@ import java.util.Map;
 import java.util.concurrent.*;
 
 @Slf4j
-@Component
+@LineEventHandler
 public class EventDispatcherImpl implements EventDispatcher {
 
     private LinkedBlockingQueue<Event> queue;
     private ExecutorService executorService;
-    private Map<String, EventHandler<? extends Event>> handlers = new HashMap<>();
+    private Map<String, EventHandler<? extends Event>> handlers;
 
     @Value("${event.handler.thread.count}")
     private int THREAD_COUNT;
@@ -29,17 +32,27 @@ public class EventDispatcherImpl implements EventDispatcher {
     @Value("${event.handler.queue.capacity}")
     private int QUEUE_CAPACITY;
 
+    final private ApplicationContext applicationContext;
+
     @Autowired
-    public EventDispatcherImpl(DefaultEventHandler defaultHandler, FollowEventHandler followEventHandler) {
-        // message, follow, join, postback, unfollow
-        handlers.put( "follow", followEventHandler );
-//        handlers.put( "message", MessageEventHandler ); // need to handle sub-types
-        handlers.put( "unknown", defaultHandler );
+    public EventDispatcherImpl(ApplicationContext applicationContext) {
+        this.applicationContext = applicationContext;
+//        // message, follow, join, postback, unfollow
+//        handlers.put( "follow", followEventHandler );
+////        handlers.put( "message", MessageEventHandler ); // need to handle sub-types
+//        handlers.put( "unknown", defaultHandler );
     }
 
     @PostConstruct
     public void init() {
         log.debug("start init");
+         handlers = new HashMap<>();
+        Map<String,Object> mapHandlers = applicationContext.getBeansWithAnnotation(LineEventHandler.class);
+        handlers.forEach((beanName, beanObj)->{
+            final String type = beanObj.getClass().getAnnotation(LineEventHandler.class).value();
+            handlers.put(type, beanObj);
+            log.info("Add ({}) event handler.", type);
+        });
         queue = new LinkedBlockingQueue<>(QUEUE_CAPACITY);
         executorService = Executors.newFixedThreadPool(THREAD_COUNT);
         executorService.submit(this::polling);

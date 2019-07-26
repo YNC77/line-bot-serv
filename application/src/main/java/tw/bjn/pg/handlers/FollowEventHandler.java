@@ -10,6 +10,7 @@ import com.linecorp.bot.model.profile.UserProfileResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import tw.bjn.pg.annotations.LineEventHandler;
 import tw.bjn.pg.interfaces.EventHandler;
 
 import java.util.concurrent.CompletableFuture;
@@ -18,7 +19,7 @@ import java.util.concurrent.CompletableFuture;
  * When someone follows your channel
  */
 @Slf4j
-@Component
+@LineEventHandler("follow")
 public class FollowEventHandler extends EventHandler<FollowEvent> {
 
     @Autowired

@@ -5,10 +5,11 @@ import com.linecorp.bot.model.event.Event;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import tw.bjn.pg.annotations.LineEventHandler;
 import tw.bjn.pg.interfaces.EventHandler;
 
 @Slf4j
-@Component
+@LineEventHandler
 public class DefaultEventHandler extends EventHandler<Event> {
 
     @Autowired
