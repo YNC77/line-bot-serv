@@ -1,17 +1,17 @@
 package tw.bjn.pg.handlers;
 
 import com.linecorp.bot.model.event.Event;
-import com.linecorp.bot.model.event.MessageEvent;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import tw.bjn.pg.interfaces.EventDispatcher;
 
 import javax.annotation.PostConstruct;
 import java.util.concurrent.*;
 
 @Slf4j
 @Component
-public class EventDispatcher {
+public class EventDispatcherImpl implements EventDispatcher {
 
     private LinkedBlockingQueue<Event> queue;
     private ExecutorService executorService;
@@ -30,13 +30,14 @@ public class EventDispatcher {
         log.error("init with queue capacity ({}) and thread count ({}) ", QUEUE_CAPACITY, THREAD_COUNT);
     }
 
-    public boolean accept( MessageEvent<?> event ){
+    public boolean accept( Event event ){
         return queue.offer(event);
     }
 
     private void polling() {
         while(true){
             Event messageEvent = queue.poll();
+            log.info("Get event - {}", messageEvent);
         }
     }
 }
