@@ -13,6 +13,7 @@ import tw.bjn.pg.utils.MsgUtils;
 import tw.bjn.pg.utils.YamlReader;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
@@ -33,11 +34,10 @@ public class TextEventHandler {
         return msgUtils.createTextMsg(getReplySentence());
     }
 
-    public Map<String,String> getQuotations() {
-        Map<String,String> mQuotations = null;
+    public Map<String, List<String>> getQuotations() {
+        Map<String, List<String>> mQuotations = null;
         try{
-
-            YamlReader<Map<String,String>> reader = new YamlReader<>();
+            YamlReader<Map<String, List<String>>> reader = new YamlReader<>();
             mQuotations = reader.parse("quotations.yml");
         } catch (IOException e) {
             log.error("幹",e);
@@ -47,10 +47,10 @@ public class TextEventHandler {
     }
 
     public String getReplySentence() {
-        Map<String, String> mQuotations = getQuotations();
+        Map<String, List<String>> mQuotations = getQuotations();
         Random random = new Random();
         int replyIndex = random.nextInt(3);
 
-        return mQuotations.get(replyIndex);
+        return mQuotations.get("replySentences").get(replyIndex);
     }
 }

@@ -6,7 +6,11 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
+import tw.bjn.pg.event.handlers.TextEventHandler;
 import tw.bjn.pg.interfaces.event.EventDispatcher;
+
+import java.util.List;
+import java.util.Map;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -15,9 +19,11 @@ public class ControllerTest {
     @Autowired
     private EventDispatcher dispatcher;
 
+    @Autowired
+    private TextEventHandler textEventHandler;
+
     // Todo: test infra, dummy server...
 
-    @Ignore
     @Test
     public void test() throws Exception {
 
@@ -33,6 +39,9 @@ public class ControllerTest {
 //                        new UserSource("U123") ,
 //                        Instant.now())
 //        );
+        Map<String, List<String>> q = textEventHandler.getQuotations();
+        String s = textEventHandler.getReplySentence();
 
+        System.out.println("ss");
     }
 }
