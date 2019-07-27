@@ -17,9 +17,11 @@ import tw.bjn.pg.utils.LineBotUtils;
 @LineEventHandler("follow")
 public class FollowEventHandler extends EventHandler<FollowEvent> {
 
+    protected LineBotUtils lineBotUtils;
+
     @Autowired
     public FollowEventHandler(LineBotUtils lineBotUtils) {
-        super(lineBotUtils);
+        this.lineBotUtils = lineBotUtils;
     }
 
     public Message onEvent(FollowEvent event) {
