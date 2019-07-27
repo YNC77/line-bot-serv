@@ -55,7 +55,7 @@ public class EventDispatcherImpl implements EventDispatcher {
 
     public <T extends Event> boolean accept(T event) {
         JsonTypeName type = event.getClass().getAnnotation(JsonTypeName.class);
-        Preconditions.checkNotNull(type); // should not be null, unless something wrong with line sdk
+        Preconditions.checkNotNull(type, "cannot get type of event"); // should not be null, unless something wrong with line sdk
         log.debug("Accept event ({}) with type ({})", event, type);
         return queue.offer(event);
     }
@@ -87,7 +87,7 @@ public class EventDispatcherImpl implements EventDispatcher {
     private EventHandler findSuitableHandler(JsonTypeName type) {
         // TODO: need a smarter way to classify various event
         if( type == null || !handlers.containsKey(type.value()) )
-            return handlers.get("unknown");
+            return handlers.get("default");
         return handlers.get(type.value());
     }
 }
