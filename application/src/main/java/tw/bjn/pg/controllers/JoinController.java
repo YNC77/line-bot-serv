@@ -7,6 +7,7 @@ import com.linecorp.bot.spring.boot.annotation.EventMapping;
 import com.linecorp.bot.spring.boot.annotation.LineMessageHandler;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import tw.bjn.pg.flows.ReplyFlow;
 import tw.bjn.pg.interfaces.controllers.ReplyController;
 
 @Slf4j
@@ -14,13 +15,12 @@ import tw.bjn.pg.interfaces.controllers.ReplyController;
 public class JoinController extends ReplyController {
 
     @Autowired
-    public JoinController(LineMessagingClient lineMessagingClient) {
-        super(lineMessagingClient);
+    public JoinController(ReplyFlow flow) {
+        super(flow);
     }
 
     @EventMapping
     public void handleJoinEvent(JoinEvent event) {
-        log.info("event: {}", event);
-        reply(event.getReplyToken(), new TextMessage("Hi, there"));
+        processEvent(event);
     }
 }

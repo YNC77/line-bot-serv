@@ -1,7 +1,7 @@
-package tw.bjn.pg.event.handlers;
+package tw.bjn.pg.event.handlers.follow;
 
-import com.linecorp.bot.model.PushMessage;
 import com.linecorp.bot.model.event.FollowEvent;
+import com.linecorp.bot.model.message.Message;
 import com.linecorp.bot.model.message.TextMessage;
 import com.linecorp.bot.model.profile.UserProfileResponse;
 import lombok.extern.slf4j.Slf4j;
@@ -22,13 +22,8 @@ public class FollowEventHandler extends EventHandler<FollowEvent> {
         super(lineBotUtils);
     }
 
-    public void onEvent(FollowEvent event) {
+    public Message onEvent(FollowEvent event) {
         UserProfileResponse profile = lineBotUtils.getUserProfile(event.getSource().getUserId());
-        lineBotUtils.pushMessage(
-                new PushMessage(
-                        event.getSource().getUserId(),
-                        new TextMessage("Hi there, "+profile.getDisplayName())
-                )
-        );
+        return new TextMessage("Hi there, "+profile.getDisplayName());
     }
 }

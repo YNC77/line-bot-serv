@@ -1,6 +1,7 @@
 package tw.bjn.pg.event.handlers;
 
 import com.linecorp.bot.model.event.Event;
+import com.linecorp.bot.model.message.Message;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import tw.bjn.pg.annotations.LineEventHandler;
@@ -17,7 +18,8 @@ public class DefaultEventHandler extends EventHandler<Event> {
     }
 
     @Override
-    public void onEvent(Event e) {
+    protected Message onEvent(Event e) {
         log.info("get event - " + e);
+        return null;
     }
 }
