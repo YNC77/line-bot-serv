@@ -6,15 +6,12 @@ import com.linecorp.bot.model.event.Event;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
-import tw.bjn.pg.annotations.LineEventHandler;
+import tw.bjn.pg.flows.ProcessEventFlow;
 import tw.bjn.pg.interfaces.event.EventDispatcher;
-import tw.bjn.pg.interfaces.event.EventHandler;
+import tw.bjn.pg.interfaces.flows.Flow;
 
 import javax.annotation.PostConstruct;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.*;
 
 @Slf4j
@@ -23,7 +20,6 @@ public class EventDispatcherImpl implements EventDispatcher {
 
     private LinkedBlockingQueue<Event> queue; // TODO: make this virtual
     private ExecutorService executorService;
-    private Map<String, EventHandler> handlers;
 
     @Value("${event.handler.thread.count}")
     private int THREAD_COUNT;
@@ -31,22 +27,15 @@ public class EventDispatcherImpl implements EventDispatcher {
     @Value("${event.handler.queue.capacity}")
     private int QUEUE_CAPACITY;
 
-    final private ApplicationContext applicationContext;
+    protected Flow processEventFlow;
 
     @Autowired
-    public EventDispatcherImpl(ApplicationContext applicationContext) {
-        this.applicationContext = applicationContext;
+    public EventDispatcherImpl(ProcessEventFlow flow) {
+        processEventFlow = flow;
     }
 
     @PostConstruct
     public void init() {
-        handlers = new HashMap<>();
-        Map<String,Object> mapHandlers = applicationContext.getBeansWithAnnotation(LineEventHandler.class);
-        mapHandlers.forEach((beanName, beanObj)->{
-            LineEventHandler type = beanObj.getClass().getAnnotation(LineEventHandler.class);
-            handlers.put(type.value(), (EventHandler) beanObj);
-            log.info("Add ({}) event handler.", type);
-        });
         queue = new LinkedBlockingQueue<>(QUEUE_CAPACITY);
         executorService = Executors.newFixedThreadPool(THREAD_COUNT);
         executorService.submit(this::polling);
@@ -65,16 +54,9 @@ public class EventDispatcherImpl implements EventDispatcher {
             try {
                 Event messageEvent = queue.take();
                 log.info("Get event - {}", messageEvent);
-                JsonTypeName type = messageEvent.getClass().getAnnotation(JsonTypeName.class);
-                EventHandler handler = findSuitableHandler(type);
-                log.debug("get handler - ({}) ({})", handler, type);
-                executorService.submit(() -> {
-                    try {
-                        handler.handle(messageEvent);
-                    } catch (Exception e) {
-                        log.error("error occurs while handling event", e);
-                    }
-                });
+                executorService.submit(() ->
+                    processEventFlow.start(messageEvent)
+                );
             } catch ( RejectedExecutionException e ) {
                 log.error("cannot submit task", e);
             } catch ( InterruptedException e ){
@@ -82,12 +64,5 @@ public class EventDispatcherImpl implements EventDispatcher {
                 break;
             }
         }
-    }
-
-    private EventHandler findSuitableHandler(JsonTypeName type) {
-        // TODO: need a smarter way to classify various event
-        if( type == null || !handlers.containsKey(type.value()) )
-            return handlers.get("default");
-        return handlers.get(type.value());
     }
 }

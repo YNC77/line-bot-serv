@@ -4,6 +4,7 @@ import com.linecorp.bot.client.LineMessagingClient;
 import com.linecorp.bot.spring.boot.annotation.LineMessageHandler;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import tw.bjn.pg.flows.ReplyFlow;
 import tw.bjn.pg.interfaces.controllers.ReplyController;
 
 @Slf4j
@@ -11,7 +12,7 @@ import tw.bjn.pg.interfaces.controllers.ReplyController;
 public class PostbackController extends ReplyController {
 
     @Autowired
-    public PostbackController(LineMessagingClient lineMessagingClient) {
-        super(lineMessagingClient);
+    public PostbackController(ReplyFlow flow) {
+        super(flow);
     }
 }
