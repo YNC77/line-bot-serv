@@ -4,22 +4,22 @@ import com.linecorp.bot.model.event.Event;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import tw.bjn.pg.interfaces.event.EventDispatcher;
+import tw.bjn.pg.interfaces.event.EventQueueManager;
 import tw.bjn.pg.interfaces.flows.Flow;
 
 @Slf4j
 @Component
 public class EnqueueFlow implements Flow {
 
-    protected EventDispatcher eventDispatcher;
+    protected EventQueueManager<Event> eventQueueManager;
 
     @Autowired
-    EnqueueFlow(EventDispatcher eventDispatcher) {
-        this.eventDispatcher = eventDispatcher;
+    EnqueueFlow(EventQueueManager<Event> eventQueueManager) {
+        this.eventQueueManager = eventQueueManager;
     }
 
     @Override
     public void start(Event event) {
-        eventDispatcher.accept(event);
+        eventQueueManager.accept(event);
     }
 }

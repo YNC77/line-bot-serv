@@ -1,6 +1,6 @@
 line.bot:
-  channel-token: 'channel-token'
-  channel-secret: 'channel-secret'
+  channel-token: test-channel-token
+  channel-secret: test-channel-secret
   handler.path: /callback
 
 event.handler:

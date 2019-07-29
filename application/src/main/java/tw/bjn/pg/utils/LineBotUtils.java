@@ -9,6 +9,7 @@ import com.linecorp.bot.model.response.BotApiResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import tw.bjn.pg.interfaces.utils.ILineBotUtils;
 
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
@@ -16,7 +17,7 @@ import java.util.concurrent.CompletionException;
 
 @Slf4j
 @Component
-public class LineBotUtils {
+public class LineBotUtils implements ILineBotUtils{
 
     private LineMessagingClient lineMessagingClient;
 
@@ -38,8 +39,11 @@ public class LineBotUtils {
     }
 
     public CompletableFuture<BotApiResponse> replyMessage(String replyToken, Message message) {
-        // return Future directly to not blocking reply thread
-        return lineMessagingClient.replyMessage(new ReplyMessage(replyToken, message));
+        return replyMessage(new ReplyMessage(replyToken, message));
+    }
+
+    public CompletableFuture<BotApiResponse> replyMessage(ReplyMessage replyMessage) {
+        return lineMessagingClient.replyMessage(replyMessage);
     }
 
     public UserProfileResponse getUserProfile(String userId) {
