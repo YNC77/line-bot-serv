@@ -44,7 +44,7 @@ public class TextEventHandler extends EventHandler<MessageEvent<TextMessageConte
     public String getReplySentence() {
         Map<String, List<String>> mQuotations = getQuotations();
         Random random = new Random();
-        int replyIndex = random.nextInt(3);
+        int replyIndex = random.nextInt(5);
 
         return mQuotations.get("replySentences").get(replyIndex);
     }
