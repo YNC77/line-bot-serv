@@ -1,18 +1,17 @@
 package tw.bjn.pg.controllers;
 
-import com.linecorp.bot.client.LineMessagingClient;
 import com.linecorp.bot.spring.boot.annotation.LineMessageHandler;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import tw.bjn.pg.flows.ReplyFlow;
-import tw.bjn.pg.interfaces.controllers.ReplyController;
+import tw.bjn.pg.flows.EnqueueFlow;
+import tw.bjn.pg.interfaces.controllers.EnqueueController;
 
 @Slf4j
 @LineMessageHandler
-public class PostbackController extends ReplyController {
+public class PostbackController extends EnqueueController {
 
     @Autowired
-    public PostbackController(ReplyFlow flow) {
+    public PostbackController(EnqueueFlow flow) {
         super(flow);
     }
 }

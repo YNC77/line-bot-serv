@@ -1,38 +1,38 @@
 package tw.bjn.pg;
 
+
+import feign.Feign;
 import org.junit.Ignore;
-import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.web.server.LocalServerPort;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
-import tw.bjn.pg.interfaces.event.EventDispatcher;
+import tw.bjn.pg.api.BotApi;
+import tw.bjn.pg.utils.CallbackRequestFactory;
 
+import javax.annotation.PostConstruct;
+
+@Ignore
+@ActiveProfiles("test")
 @RunWith(SpringRunner.class)
-@SpringBootTest
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class ControllerTest {
 
+    @LocalServerPort
+    protected int port;
+
     @Autowired
-    private EventDispatcher dispatcher;
+    protected CallbackRequestFactory requestFactory;
 
-    // Todo: test infra, dummy server...
+    protected BotApi api;
 
-    @Ignore
-    @Test
-    public void test() throws Exception {
-
-//        MessageController messageController = new MessageController();
-//        FollowController followController = new FollowController( dispatcher );
-//
-//        messageController.handleTextMessageEvent(
-//                new MessageEvent<>("token", new UserSource("U123"),
-//                        new TextMessageContent("id", "test text"), Instant.now()));
-//
-//        followController.handleFollowEvent(
-//                new FollowEvent( "",
-//                        new UserSource("U123") ,
-//                        Instant.now())
-//        );
-
+    @PostConstruct
+    public void init() {
+        api  = Feign.builder()
+                .target(BotApi.class, "http://0.0.0.0:" + port);
     }
+
 }
+

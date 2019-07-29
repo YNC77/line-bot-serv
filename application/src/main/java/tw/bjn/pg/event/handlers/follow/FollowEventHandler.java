@@ -8,7 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import tw.bjn.pg.annotations.LineEventHandler;
 import tw.bjn.pg.interfaces.event.EventHandler;
-import tw.bjn.pg.utils.LineBotUtils;
+import tw.bjn.pg.interfaces.utils.ILineBotUtils;
 
 /**
  * When someone follows your channel
@@ -17,10 +17,10 @@ import tw.bjn.pg.utils.LineBotUtils;
 @LineEventHandler("follow")
 public class FollowEventHandler extends EventHandler<FollowEvent> {
 
-    protected LineBotUtils lineBotUtils;
+    protected ILineBotUtils lineBotUtils;
 
     @Autowired
-    public FollowEventHandler(LineBotUtils lineBotUtils) {
+    public FollowEventHandler(ILineBotUtils lineBotUtils) {
         this.lineBotUtils = lineBotUtils;
     }
 

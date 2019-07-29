@@ -7,7 +7,6 @@ import tw.bjn.pg.interfaces.flows.Flow;
 
 @Slf4j
 public abstract class EnqueueController extends LineBotController {
-    // TODO: using message queues to handle various messages, only reply urgent message immediately
 
     protected Flow enqueueFlow;
 

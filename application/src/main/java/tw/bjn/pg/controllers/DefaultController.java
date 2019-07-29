@@ -7,6 +7,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import tw.bjn.pg.flows.EnqueueFlow;
 import tw.bjn.pg.interfaces.controllers.EnqueueController;
 
+/**
+ * Handle fallback event
+ */
 @LineMessageHandler
 public class DefaultController extends EnqueueController {
 
