@@ -3,11 +3,16 @@ package tw.bjn.pg.event.handlers.message;
 import com.linecorp.bot.model.event.MessageEvent;
 import com.linecorp.bot.model.event.message.TextMessageContent;
 import com.linecorp.bot.model.message.Message;
-import com.linecorp.bot.model.message.TextMessage;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import tw.bjn.pg.interfaces.event.EventHandler;
 import tw.bjn.pg.utils.MsgUtils;
 import tw.bjn.pg.utils.YamlReader;
+
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
 
 @Component
 public class TextEventHandler extends EventHandler<MessageEvent<TextMessageContent>> {
@@ -30,7 +35,7 @@ public class TextEventHandler extends EventHandler<MessageEvent<TextMessageConte
             YamlReader<Map<String, List<String>>> reader = new YamlReader<>();
             mQuotations = reader.parse("quotations.yml");
         } catch (IOException e) {
-            log.error("幹",e);
+//            log.error("幹",e);
         }
 
         return mQuotations;
