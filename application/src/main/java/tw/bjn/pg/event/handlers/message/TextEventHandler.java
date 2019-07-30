@@ -5,11 +5,13 @@ import com.linecorp.bot.model.event.message.TextMessageContent;
 import com.linecorp.bot.model.message.Message;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import tw.bjn.pg.dao.TestDatabase;
 import tw.bjn.pg.interfaces.event.EventHandler;
 import tw.bjn.pg.utils.MsgUtils;
 import tw.bjn.pg.utils.YamlReader;
 
 import java.io.IOException;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -18,15 +20,26 @@ import java.util.Random;
 public class TextEventHandler extends EventHandler<MessageEvent<TextMessageContent>> {
 
     private MsgUtils msgUtils;
+    private TestDatabase testDatabase;
 
     @Autowired
-    TextEventHandler(MsgUtils msgUtils) {
+    TextEventHandler(MsgUtils msgUtils, TestDatabase testDatabase) {
         this.msgUtils = msgUtils;
+        this.testDatabase = testDatabase;
     }
 
     @Override
     public Message onEvent(MessageEvent<TextMessageContent> event) {
-        return msgUtils.createTextMsg(getReplySentence());
+        if (event.getMessage().getText().contains("$")) {
+            int getPrice = Integer.parseInt(event.getMessage().getText().substring(1));
+            Date d = new Date();
+            long timestamp = d.getTime();
+            boolean insertResult = testDatabase.insert(Integer.parseInt(event.getMessage().getId()), getPrice, timestamp);
+            return msgUtils.createTextMsg(event.getMessage().getText());
+        } else {
+            return msgUtils.createTextMsg(getReplySentence());
+        }
+
     }
 
     public Map<String, List<String>> getQuotations() {

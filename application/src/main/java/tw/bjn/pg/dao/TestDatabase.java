@@ -2,13 +2,15 @@ package tw.bjn.pg.dao;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestMapping;
 import javax.sql.DataSource;
 import java.net.URISyntaxException;
 import java.sql.*;
 import java.util.ArrayList;
 
-public class testDatabase {
+@Component
+public class TestDatabase {
 
     @Value("${spring.datasource.url}")
     private String dbUrl;
@@ -22,23 +24,37 @@ public class testDatabase {
     }
 
     @RequestMapping("/db")
-    boolean insert(int uid, int price, String time) {
+    public boolean insert(int uid, int price, long time) {
         try {
             Connection connection = dataSource.getConnection();
             Statement stmt = connection.createStatement();
 //            stmt.execute("CREATE TABLE IF NOT EXISTS testTable");
             stmt.execute("INSERT INTO testTable(uid,price,time) VALUES ("+uid+","+price+","+time+") ");
-            ResultSet rs = stmt.executeQuery("SELECT price FROM testTable");
-
-            ArrayList<String> output = new ArrayList<String>();
-            while (rs.next()) {
-                output.add("Read from DB: " + rs.getInt("price"));
-            }
 
             return true;
         } catch (SQLException e) {
             e.printStackTrace();
             return false;
+        }
+    }
+
+    int queryTotalPrice(int uid) {
+        try {
+            Statement stmt = getConnection().createStatement();
+            ResultSet rs = stmt.executeQuery("SELECT price FROM testTable WHERE uid = "+uid);
+
+            int totalPrice = 0;
+            while (rs.next()) {
+                totalPrice += rs.getInt("price");
+            }
+
+            return totalPrice;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return 0;
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+            return 0;
         }
     }
 }
