@@ -3,6 +3,7 @@ package tw.bjn.pg.event.handlers.message;
 import com.linecorp.bot.model.event.MessageEvent;
 import com.linecorp.bot.model.event.message.TextMessageContent;
 import com.linecorp.bot.model.message.Message;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import tw.bjn.pg.dao.TestDatabase;
@@ -16,6 +17,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
+@Slf4j
 @Component
 public class TextEventHandler extends EventHandler<MessageEvent<TextMessageContent>> {
 
@@ -31,6 +33,7 @@ public class TextEventHandler extends EventHandler<MessageEvent<TextMessageConte
     @Override
     public Message onEvent(MessageEvent<TextMessageContent> event) {
         if (event.getMessage().getText().contains("$")) {
+            log.info("event: {}", event.getMessage().getText().substring(1));
             int getPrice = Integer.parseInt(event.getMessage().getText().substring(1));
             Date d = new Date();
             long timestamp = d.getTime();
