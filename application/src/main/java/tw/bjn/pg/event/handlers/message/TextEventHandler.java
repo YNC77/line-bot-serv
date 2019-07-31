@@ -13,6 +13,7 @@ import tw.bjn.pg.utils.MsgUtils;
 import tw.bjn.pg.utils.YamlReader;
 
 import java.io.IOException;
+import java.sql.Timestamp;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -36,9 +37,7 @@ public class TextEventHandler extends EventHandler<MessageEvent<TextMessageConte
         if (event.getMessage().getText().contains("$")) {
             log.info("event: {}", event.getMessage().getText().substring(1));
             int getPrice = Integer.parseInt(event.getMessage().getText().substring(1));
-            Date d = new Date();
-            long timestamp = d.getTime();
-            boolean insertResult = testDatabase.insert(event.getSource().getUserId(), getPrice, timestamp);
+            boolean insertResult = testDatabase.insert(event.getSource().getUserId(), getPrice, Timestamp.from(event.getTimestamp()));
 
             return msgUtils.createTextMsg(event.getMessage().getText());
         } else {
