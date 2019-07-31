@@ -12,6 +12,9 @@ import java.net.URISyntaxException;
 @SpringBootApplication
 public class Application {
 
+//    @Bean
+//    public JdbcTemplate
+
     @Bean
     public DataSource dataSource() throws URISyntaxException {
         URI dbUri = new URI(System.getenv("DATABASE_URL"));

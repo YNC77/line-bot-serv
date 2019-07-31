@@ -29,9 +29,19 @@ public class TestDatabase {
         try {
             Connection connection = dataSource.getConnection();
 //            Statement stmt = getConnection().createStatement();
-            Statement stmt = connection.createStatement();
+//            Statement stmt = connection.createStatement();
 //            stmt.execute("CREATE TABLE IF NOT EXISTS testTable");
-            stmt.execute("INSERT INTO testtable(uid,price,time) VALUES ("+uid+","+price+","+time+") ");
+//            stmt.execute("INSERT INTO testtable(uid,price,time) VALUES (?,?,?) ");
+
+            String myStatement = "INSERT INTO testtable(uid,price,time) VALUES (?,?,?)";
+            PreparedStatement statement = connection.prepareStatement(myStatement);
+            statement.setString(1, uid);
+            statement.setInt(2, price);
+            statement.setLong(3, time);
+            statement.executeUpdate();
+
+            statement.close();
+            connection.close();
 
             return true;
         } catch (SQLException e) {
