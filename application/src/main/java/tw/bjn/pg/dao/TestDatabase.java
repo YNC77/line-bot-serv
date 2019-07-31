@@ -25,7 +25,7 @@ public class TestDatabase {
         return DriverManager.getConnection(dbUrl);
     }
 
-    public boolean insert(String uid, int price, long time) {
+    public boolean insert(String uid, int price, Timestamp time) {
         try {
             Connection connection = dataSource.getConnection();
 //            Statement stmt = getConnection().createStatement();
@@ -37,7 +37,7 @@ public class TestDatabase {
             PreparedStatement statement = connection.prepareStatement(myStatement);
             statement.setString(1, uid);
             statement.setInt(2, price);
-            statement.setLong(3, time);
+            statement.setTimestamp(3, time);
             statement.executeUpdate();
 
             statement.close();
