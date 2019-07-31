@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestMapping;
 //import javax.sql.DataSource;
+import java.math.BigInteger;
 import java.net.URISyntaxException;
 import java.sql.*;
 import java.util.ArrayList;
@@ -25,13 +26,13 @@ public class TestDatabase {
     }
 
     @RequestMapping("/db")
-    public boolean insert(int uid, int price, long time) {
+    public boolean insert(String uid, int price, long time) {
         try {
 //            Connection connection = dataSource.getConnection();
             Statement stmt = getConnection().createStatement();
 //            Statement stmt = connection.createStatement();
 //            stmt.execute("CREATE TABLE IF NOT EXISTS testTable");
-            stmt.execute("INSERT INTO testTable(uid,price,time) VALUES ("+uid+","+price+","+time+") ");
+            stmt.execute("INSERT INTO testtable(uid,price,time) VALUES ("+uid+","+price+","+time+") ");
 
             return true;
         } catch (SQLException e) {
@@ -46,7 +47,7 @@ public class TestDatabase {
     int queryTotalPrice(int uid) {
         try {
             Statement stmt = getConnection().createStatement();
-            ResultSet rs = stmt.executeQuery("SELECT price FROM testTable WHERE uid = "+uid);
+            ResultSet rs = stmt.executeQuery("SELECT price FROM testtable WHERE uid = "+uid);
 
             int totalPrice = 0;
             while (rs.next()) {

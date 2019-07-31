@@ -2,6 +2,7 @@ package tw.bjn.pg.event.handlers.message;
 
 import com.linecorp.bot.model.event.MessageEvent;
 import com.linecorp.bot.model.event.message.TextMessageContent;
+import com.linecorp.bot.model.event.source.UserSource;
 import com.linecorp.bot.model.message.Message;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,7 +38,7 @@ public class TextEventHandler extends EventHandler<MessageEvent<TextMessageConte
             int getPrice = Integer.parseInt(event.getMessage().getText().substring(1));
             Date d = new Date();
             long timestamp = d.getTime();
-            boolean insertResult = testDatabase.insert(Integer.parseInt(event.getMessage().getId()), getPrice, timestamp);
+            boolean insertResult = testDatabase.insert(event.getSource().getUserId(), getPrice, timestamp);
             return msgUtils.createTextMsg(event.getMessage().getText());
         } else {
             return msgUtils.createTextMsg(getReplySentence());
