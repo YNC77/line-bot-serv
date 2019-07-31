@@ -8,7 +8,7 @@ import tw.bjn.pg.annotations.LineEventHandler;
 import tw.bjn.pg.interfaces.event.EventHandler;
 
 @Slf4j
-@LineEventHandler("join")
+@LineEventHandler
 public class JoinEventHandler extends EventHandler<JoinEvent> {
 
     @Override

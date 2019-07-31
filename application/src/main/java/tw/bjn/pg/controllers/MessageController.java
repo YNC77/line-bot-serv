@@ -9,6 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import tw.bjn.pg.flows.EnqueueFlow;
 import tw.bjn.pg.interfaces.controllers.EnqueueController;
 
+import java.lang.reflect.Type;
+
 @Slf4j
 @LineMessageHandler
 public class MessageController extends EnqueueController {

@@ -1,7 +1,5 @@
 package tw.bjn.pg.event.queue;
 
-import com.fasterxml.jackson.annotation.JsonTypeName;
-import com.google.common.base.Preconditions;
 import com.linecorp.bot.model.event.Event;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -10,15 +8,19 @@ import tw.bjn.pg.interfaces.event.EventQueueManager;
 
 import javax.annotation.PostConstruct;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 /**
  * Temporary implementation,
  * will use rabbitmq solution later and separate handlers to another worker process
+ * ## forget about this plan, this will cost lots of "dyno's hours" and we're not gonna pay that.
  */
 @Slf4j
 @Component
@@ -27,61 +29,31 @@ public class QueueManagerImpl implements EventQueueManager<Event>{
     @Value("${event.handler.queue.capacity}")
     private int QUEUE_CAPACITY;
 
-    @Value("${event.handler.thread.count}")
-    private int THREAD_COUNT;
-
     private LinkedBlockingQueue<Event> queue;
-
-    private ExecutorService executorService;
-
-    private List<Consumer<Event>> listeners;
-
 
     @PostConstruct
     public void init() {
         queue = new LinkedBlockingQueue<>(QUEUE_CAPACITY);
-        listeners = new ArrayList<>();
-        executorService = Executors.newFixedThreadPool(THREAD_COUNT);
-        executorService.submit(this::listening);
-        log.info("init thread pool ({}) and queue ({})", THREAD_COUNT, QUEUE_CAPACITY);
+        log.info("init queue size ({})", QUEUE_CAPACITY);
     }
 
     @Override
     public boolean accept(Event event) {
-        JsonTypeName type = event.getClass().getAnnotation(JsonTypeName.class);
-        Preconditions.checkNotNull(type, "cannot get type of event"); // should not be null, unless something wrong with line sdk
-        log.debug("Accept event ({}) with type ({})", event, type);
         return queue.offer(event);
     }
 
-    private void listening() {
-        while(true) {
-            try {
-                if (listeners.isEmpty()) {
-                    // probably configuration error
-                    Thread.sleep(1000);
-                    continue;
-                }
-                Event event = queue.take();
-                listeners.forEach(
-                        listener -> executorService.submit(() -> {
-                            try {
-                                listener.accept(event);
-                            } catch (Exception e) {
-                                log.error("Exception in handler.", e);
-                            }
-                        }));
-            } catch (InterruptedException e) {
-                log.error("Interrupted.", e);
-                break;
-            } catch (Exception e) {
-                log.error("Unexpected error.", e);
-            }
-        }
-    }
-
     @Override
-    public boolean registerListener(Consumer<Event> consumer) {
-        return listeners.add(consumer);
+    public Event poll(long timeout, TimeUnit unit) {
+        try {
+            if (timeout == -1)
+                return queue.take();
+            if (timeout == 0)
+                return queue.poll();
+            return queue.poll(timeout, unit);
+        } catch (InterruptedException e) {
+            log.error("Interrupted.", e);
+            Thread.currentThread().interrupt(); // set interrupt flag
+            return null;
+        }
     }
 }

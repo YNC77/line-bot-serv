@@ -7,7 +7,7 @@ import tw.bjn.pg.annotations.LineEventHandler;
 import tw.bjn.pg.interfaces.event.EventHandler;
 
 @Slf4j
-@LineEventHandler("default")
+@LineEventHandler(fallback = true)
 public class DefaultEventHandler extends EventHandler<Event> {
 
     @Override
