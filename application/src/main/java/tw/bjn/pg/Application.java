@@ -24,6 +24,7 @@ public class Application {
         basicDataSource.setUrl(dbUrl);
         basicDataSource.setUsername(username);
         basicDataSource.setPassword(password);
+        basicDataSource.setDriverClassName("");
         return basicDataSource;
     }
 

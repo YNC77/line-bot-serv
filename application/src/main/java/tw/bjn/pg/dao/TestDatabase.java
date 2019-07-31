@@ -25,7 +25,6 @@ public class TestDatabase {
         return DriverManager.getConnection(dbUrl);
     }
 
-    @RequestMapping("/db")
     public boolean insert(String uid, int price, long time) {
         try {
             Connection connection = dataSource.getConnection();

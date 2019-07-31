@@ -39,6 +39,7 @@ public class TextEventHandler extends EventHandler<MessageEvent<TextMessageConte
             Date d = new Date();
             long timestamp = d.getTime();
             boolean insertResult = testDatabase.insert(event.getSource().getUserId(), getPrice, timestamp);
+
             return msgUtils.createTextMsg(event.getMessage().getText());
         } else {
             return msgUtils.createTextMsg(getReplySentence());
