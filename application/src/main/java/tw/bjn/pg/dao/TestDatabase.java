@@ -5,7 +5,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestMapping;
-import javax.sql.DataSource;
+//import javax.sql.DataSource;
 import java.net.URISyntaxException;
 import java.sql.*;
 import java.util.ArrayList;
@@ -16,8 +16,8 @@ public class TestDatabase {
     @Value("${spring.datasource.url}")
     private String dbUrl;
 
-    @Autowired
-    private DataSource dataSource;
+//    @Autowired
+//    private DataSource dataSource;
 
     private static Connection getConnection() throws URISyntaxException, SQLException {
         String dbUrl = System.getenv("JDBC_DATABASE_URL");
