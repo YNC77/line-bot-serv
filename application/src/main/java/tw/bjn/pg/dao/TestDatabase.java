@@ -2,6 +2,7 @@ package tw.bjn.pg.dao;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestMapping;
 import javax.sql.DataSource;
@@ -26,13 +27,17 @@ public class TestDatabase {
     @RequestMapping("/db")
     public boolean insert(int uid, int price, long time) {
         try {
-            Connection connection = dataSource.getConnection();
-            Statement stmt = connection.createStatement();
+//            Connection connection = dataSource.getConnection();
+            Statement stmt = getConnection().createStatement();
+//            Statement stmt = connection.createStatement();
 //            stmt.execute("CREATE TABLE IF NOT EXISTS testTable");
             stmt.execute("INSERT INTO testTable(uid,price,time) VALUES ("+uid+","+price+","+time+") ");
 
             return true;
         } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        } catch (URISyntaxException e) {
             e.printStackTrace();
             return false;
         }
@@ -57,4 +62,14 @@ public class TestDatabase {
             return 0;
         }
     }
+
+//    @Bean
+//    public DataSource dataSource() throws SQLException {
+//        if (dbUrl == null || dbUrl.isEmpty()) {
+//            return new HikariDataSource();
+//        } else {
+//            HikariConfig config = new HikariConfig();
+//            config.setJdbcUrl(dbUrl);
+//            return new HikariDataSource(config);
+//        }
 }
