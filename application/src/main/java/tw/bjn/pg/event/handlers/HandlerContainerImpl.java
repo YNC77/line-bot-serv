@@ -11,7 +11,6 @@ import tw.bjn.pg.interfaces.event.EventHandler;
 import tw.bjn.pg.interfaces.event.HandlerContainer;
 
 import javax.annotation.PostConstruct;
-import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
