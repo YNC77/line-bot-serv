@@ -5,7 +5,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestMapping;
-//import javax.sql.DataSource;
+import javax.sql.DataSource;
 import java.math.BigInteger;
 import java.net.URISyntaxException;
 import java.sql.*;
@@ -17,8 +17,8 @@ public class TestDatabase {
     @Value("${spring.datasource.url}")
     private String dbUrl;
 
-//    @Autowired
-//    private DataSource dataSource;
+    @Autowired
+    private DataSource dataSource;
 
     private static Connection getConnection() throws URISyntaxException, SQLException {
         String dbUrl = System.getenv("JDBC_DATABASE_URL");
@@ -28,9 +28,9 @@ public class TestDatabase {
     @RequestMapping("/db")
     public boolean insert(String uid, int price, long time) {
         try {
-//            Connection connection = dataSource.getConnection();
-            Statement stmt = getConnection().createStatement();
-//            Statement stmt = connection.createStatement();
+            Connection connection = dataSource.getConnection();
+//            Statement stmt = getConnection().createStatement();
+            Statement stmt = connection.createStatement();
 //            stmt.execute("CREATE TABLE IF NOT EXISTS testTable");
             stmt.execute("INSERT INTO testtable(uid,price,time) VALUES ("+uid+","+price+","+time+") ");
 
@@ -38,15 +38,14 @@ public class TestDatabase {
         } catch (SQLException e) {
             e.printStackTrace();
             return false;
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
-            return false;
         }
     }
 
     int queryTotalPrice(int uid) {
         try {
-            Statement stmt = getConnection().createStatement();
+            Connection connection = dataSource.getConnection();
+            Statement stmt = connection.createStatement();
+//            Statement stmt = getConnection().createStatement();
             ResultSet rs = stmt.executeQuery("SELECT price FROM testtable WHERE uid = "+uid);
 
             int totalPrice = 0;
@@ -56,9 +55,6 @@ public class TestDatabase {
 
             return totalPrice;
         } catch (SQLException e) {
-            e.printStackTrace();
-            return 0;
-        } catch (URISyntaxException e) {
             e.printStackTrace();
             return 0;
         }
