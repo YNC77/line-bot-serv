@@ -12,10 +12,11 @@ import tw.bjn.pg.interfaces.event.EventHandler;
 import tw.bjn.pg.utils.MsgUtils;
 import tw.bjn.pg.utils.YamlReader;
 
+import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.sql.Timestamp;
+import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Random;
 
 @Slf4j
@@ -24,11 +25,17 @@ public class TextEventHandler extends EventHandler<MessageEvent<TextMessageConte
 
     private MsgUtils msgUtils;
     private Database testDatabase;
+    private List<String> quotations = Collections.emptyList();
 
     @Autowired
     TextEventHandler(MsgUtils msgUtils, Database testDatabase) {
         this.msgUtils = msgUtils;
         this.testDatabase = testDatabase;
+    }
+
+    @PostConstruct
+    public void init() {
+        quotations = getQuotations();
     }
 
     @Override
@@ -46,24 +53,25 @@ public class TextEventHandler extends EventHandler<MessageEvent<TextMessageConte
 
     }
 
-    public Map<String, List<String>> getQuotations() {
-        Map<String, List<String>> mQuotations = null;
+    public List<String> getQuotations() {
+        List<String> quotationlist = Collections.emptyList();
         try{
-            YamlReader<Map<String, List<String>>> reader = new YamlReader<>();
-            mQuotations = reader.parse("quotations.yml");
+            YamlReader<List<String>> reader = new YamlReader<>();
+            quotationlist = reader.parse("quotations.yml");
         } catch (IOException e) {
             log.error("Read yaml failed.", e);
         }
 
-        return mQuotations;
+        return quotationlist;
     }
 
     public String getReplySentence() {
-        // TODO: handle null cases
-        Map<String, List<String>> mQuotations = getQuotations();
-        Random random = new Random();
-        int replyIndex = random.nextInt(5); // hard-coding
+        if (quotations.isEmpty())
+            return "";
 
-        return mQuotations.get("replySentences").get(replyIndex);
+        Random random = new Random();
+        int replyIndex = random.nextInt(quotations.size());
+
+        return quotations.get(replyIndex);
     }
 }

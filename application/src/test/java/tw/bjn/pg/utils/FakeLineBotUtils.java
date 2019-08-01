@@ -14,7 +14,7 @@ import java.util.concurrent.CompletableFuture;
 @Slf4j
 @Profile("test")
 @Component
-public class TestLineBotUtils implements ILineBotUtils{
+public class FakeLineBotUtils implements ILineBotUtils{
     @Override
     public boolean pushMessage(String userId, Message message) {
         log.debug("get userId '{}' with message '{}'", userId, message);

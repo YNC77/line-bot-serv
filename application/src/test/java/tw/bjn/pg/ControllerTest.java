@@ -10,7 +10,7 @@ import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import tw.bjn.pg.api.BotApi;
-import tw.bjn.pg.utils.CallbackRequestFactory;
+import tw.bjn.pg.callbacks.CallbackRequestFactory;
 
 import javax.annotation.PostConstruct;
 

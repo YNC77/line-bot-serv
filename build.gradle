@@ -35,6 +35,20 @@ subprojects {
         testCompileOnly('org.projectlombok:lombok:1.18.8')
     }
 
+    test {
+        testLogging.showStandardStreams = true
+//        testLogging.exceptionFormat = 'full'
+        testLogging.events = ["passed", "skipped", "failed"]
+        afterSuite { desc, result ->
+            if (!desc.parent) {
+                def output = "Test: ${result.resultType} (${result.testCount} tests, ${result.successfulTestCount} successes, ${result.failedTestCount} failures, ${result.skippedTestCount} skipped)"
+                def startItem = '||  ', endItem = '  ||'
+                def repeatLength = startItem.length() + output.length() + endItem.length()
+                println('\n' + ('=' * repeatLength) + '\n' + startItem + output + endItem + '\n' + ('=' * repeatLength))
+            }
+        }
+    }
+
     task stage(dependsOn: ['build', 'clean'])
     build.mustRunAfter clean
 }
