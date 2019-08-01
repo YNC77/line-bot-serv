@@ -29,7 +29,11 @@ public class DispatchAndProcessEventFlow implements Flow {
     public void start(Event event) {
         try {
             EventHandler<Event> handler = handlerContainer.findSuitableHandler(event);
-            log.debug("run handler - ({})", handler);
+            if (handler == null) {
+                log.error("No available handler to handle event ({})", event);
+                return;
+            }
+            log.debug("process ({}) event with ({}) handler", event, handler);
             Optional<ReplyMessage> optionalReply = handler.handle(event);
             optionalReply.ifPresent(lineBotUtils::replyMessage);
         } catch (Exception e) {

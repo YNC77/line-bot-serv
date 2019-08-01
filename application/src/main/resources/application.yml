@@ -12,8 +12,13 @@ logging:
     ROOT: INFO
     tw.bjn.pg: DEBUG
 
+
 spring:
   datasource:
     url: ${JDBC_DATABASE_URL}
     username: ${JDBC_DATABASE_USERNAME}
     password: ${JDBC_DATABASE_PASSWORD}
+
+  pattern:
+    console: '%d{"yyyy:MM:dd HH:mm:ss,SSS"} [%5p] [%t] \(%F:%M:%L\) %msg%n'
+

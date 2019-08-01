@@ -6,3 +6,10 @@ line.bot:
 event.handler:
   queue.capacity: 1024
   thread.count: 4
+
+logging:
+  level:
+    ROOT: INFO
+    tw.bjn.pg: DEBUG
+  pattern:
+    console: '%d{"yyyy:MM:dd HH:mm:ss,SSS"} [%5p] [%t] \(%F:%M:%L\) %msg%n'

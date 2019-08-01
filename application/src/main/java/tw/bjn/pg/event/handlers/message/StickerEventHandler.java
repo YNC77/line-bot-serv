@@ -4,14 +4,13 @@ import com.linecorp.bot.model.event.MessageEvent;
 import com.linecorp.bot.model.event.message.StickerMessageContent;
 import com.linecorp.bot.model.message.Message;
 import com.linecorp.bot.model.message.StickerMessage;
-import com.linecorp.bot.model.message.TextMessage;
-import org.springframework.stereotype.Component;
+import tw.bjn.pg.annotations.LineEventHandler;
 import tw.bjn.pg.interfaces.event.EventHandler;
 
 import javax.annotation.PostConstruct;
 import java.util.*;
 
-@Component
+@LineEventHandler
 public class StickerEventHandler extends EventHandler<MessageEvent<StickerMessageContent>> {
 
     class StickerPackage{

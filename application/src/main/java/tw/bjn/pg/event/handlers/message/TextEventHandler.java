@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import tw.bjn.pg.dao.TestDatabase;
+
 import tw.bjn.pg.interfaces.event.EventHandler;
 import tw.bjn.pg.utils.MsgUtils;
 import tw.bjn.pg.utils.YamlReader;
@@ -21,6 +22,7 @@ import java.util.Random;
 
 @Slf4j
 @Component
+
 public class TextEventHandler extends EventHandler<MessageEvent<TextMessageContent>> {
 
     private MsgUtils msgUtils;

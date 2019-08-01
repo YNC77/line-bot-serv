@@ -14,7 +14,7 @@ import tw.bjn.pg.interfaces.utils.ILineBotUtils;
  * When someone follows your channel
  */
 @Slf4j
-@LineEventHandler("follow")
+@LineEventHandler
 public class FollowEventHandler extends EventHandler<FollowEvent> {
 
     protected ILineBotUtils lineBotUtils;

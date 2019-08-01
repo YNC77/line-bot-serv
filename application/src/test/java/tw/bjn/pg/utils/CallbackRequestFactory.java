@@ -4,11 +4,10 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
 import com.linecorp.bot.client.LineSignatureValidator;
-import com.linecorp.bot.model.event.CallbackRequest;
-import com.linecorp.bot.model.event.Event;
-import com.linecorp.bot.model.event.MessageEvent;
+import com.linecorp.bot.model.event.*;
 import com.linecorp.bot.model.event.message.MessageContent;
 import com.linecorp.bot.model.event.source.UserSource;
+import com.linecorp.bot.model.event.things.ThingsContent;
 import com.linecorp.bot.model.objectmapper.ModelObjectMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
@@ -36,19 +35,53 @@ public class CallbackRequestFactory {
         objectMapper = ModelObjectMapper.createNewObjectMapper();
     }
 
+    public String createFollowRequest() {
+        FollowEvent event = new FollowEvent(
+                "Replytoken",
+                new UserSource("Uuserid"),
+                Instant.now());
+        return toRequest(event);
+    }
+
+    public String createJoinRequest() {
+        JoinEvent event = new JoinEvent(
+                "Replytoken",
+                new UserSource("Uuserid"),
+                Instant.now());
+        return toRequest(event);
+    }
+
+    public String createThingsRequest() {
+        ThingsEvent event = new ThingsEvent(
+                "Replytoken",
+                new UserSource("Uuserid"),
+                new ThingsContent("deviceId", ThingsContent.ThingsType.LINK),
+                Instant.now());
+        return toRequest(event);
+    }
+
     public <T extends MessageContent> String createMessageRequest(T message) {
-      try {
-          Event event = new MessageEvent<>("Replytoken",
-                  new UserSource("Uuserid"),
-                  message,
-                  Instant.now());
-          CallbackRequest request = new CallbackRequest(Lists.newArrayList(event), "dest");
-          return objectMapper.writeValueAsString(request);
-      } catch (JsonProcessingException e) {
-          System.out.println("Create json failed");
-          e.printStackTrace();
-          return null;
-      }
+        Event event = new MessageEvent<>(
+                "Replytoken",
+                new UserSource("Uuserid"),
+                message,
+                Instant.now());
+        return toRequest(event);
+    }
+
+    private String toRequest(Event event) {
+        CallbackRequest request = new CallbackRequest(Lists.newArrayList(event), "dest");
+        return objectToJsonString(request);
+    }
+
+    private String objectToJsonString(Object object) {
+        try {
+            return objectMapper.writeValueAsString(object);
+        } catch (JsonProcessingException e) {
+            System.out.println("Create json failed");
+            e.printStackTrace();
+            return null;
+        }
     }
 
     public String getBotSignature(byte[] json) {

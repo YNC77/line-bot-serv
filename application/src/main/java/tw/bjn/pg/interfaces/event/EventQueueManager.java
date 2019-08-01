@@ -2,10 +2,11 @@ package tw.bjn.pg.interfaces.event;
 
 import com.linecorp.bot.model.event.Event;
 
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 public interface EventQueueManager<T extends Event> {
     boolean accept(T event);
-    boolean registerListener(Consumer<T> consumer);
+    T poll(long timeout, TimeUnit unit);
     // TODO: support multi-queue
 }

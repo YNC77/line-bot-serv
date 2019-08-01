@@ -36,6 +36,6 @@ public class TestLineBotUtils implements ILineBotUtils{
     @Override
     public UserProfileResponse getUserProfile(String userId) {
         log.debug("get user id '{}'",userId);
-        return null;
+        return new UserProfileResponse("Name", userId, "", "my status");
     }
 }
