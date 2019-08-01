@@ -6,6 +6,7 @@ import com.linecorp.bot.model.message.Message;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import tw.bjn.pg.annotations.LineEventHandler;
+import tw.bjn.pg.calculator.Calculator;
 import tw.bjn.pg.dao.Database;
 
 import tw.bjn.pg.interfaces.event.EventHandler;
@@ -25,12 +26,14 @@ public class TextEventHandler extends EventHandler<MessageEvent<TextMessageConte
 
     private MsgUtils msgUtils;
     private Database testDatabase;
+    private Calculator calculator;
     private List<String> quotations = Collections.emptyList();
 
     @Autowired
-    TextEventHandler(MsgUtils msgUtils, Database testDatabase) {
+    TextEventHandler(MsgUtils msgUtils, Database testDatabase, Calculator calculator) {
         this.msgUtils = msgUtils;
         this.testDatabase = testDatabase;
+        this.calculator = calculator;
     }
 
     @PostConstruct
@@ -40,7 +43,16 @@ public class TextEventHandler extends EventHandler<MessageEvent<TextMessageConte
 
     @Override
     public Message onEvent(MessageEvent<TextMessageContent> event) {
-        if (event.getMessage().getText().contains("$")) { // TODO: not beautiful
+        final String message = event.getMessage().getText();
+        if (message.matches("[0-9+\\-*/()\\s]+")) {
+            try {
+                int result = calculator.calc(message);
+                return msgUtils.createTextMsg(String.valueOf(result));
+            } catch (Exception e) {
+                log.error("failed to calculate", e);
+            }
+        }
+        if (message.contains("$")) { // TODO: not beautiful
             log.info("event: {}", event.getMessage().getText().substring(1));
             int getPrice = Integer.parseInt(event.getMessage().getText().substring(1));
             boolean insertResult = testDatabase.insert(event.getSource().getUserId(), getPrice, Timestamp.from(event.getTimestamp()));

@@ -1,0 +1,5 @@
+
+dependencies {
+    compile('org.springframework.boot:spring-boot-starter:2.1.6.RELEASE') // same as line sdk
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+}
