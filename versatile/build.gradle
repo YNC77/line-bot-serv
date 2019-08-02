@@ -1,8 +1,7 @@
 
 dependencies {
+    compile project(':utilities')
     compile project(':dao')
-    compile group: 'org.springframework.boot', name: 'spring-boot-starter', version: '2.1.6.RELEASE' // same as line sdk
-//    compile group: 'org.springframework.boot', name: 'spring-boot-starter-data-jpa', version: '2.1.6.RELEASE'
-//    compile group: 'org.postgresql', name: 'postgresql', version: '42.2.6'
+
     testCompile group: 'junit', name: 'junit', version: '4.12'
 }

@@ -13,6 +13,11 @@ public class MessageControllerTest extends ControllerTest{
         String signature = requestFactory.getBotSignature(json.getBytes());
         String response = api.callback(json, signature);
         // TODO: validation
+
+        String jsn = requestFactory.createMessageRequest(
+                new TextMessageContent("msg-id", " $3020 "));
+        String sgnature = requestFactory.getBotSignature(jsn.getBytes());
+        api.callback(jsn, sgnature);
     }
 
     @Test

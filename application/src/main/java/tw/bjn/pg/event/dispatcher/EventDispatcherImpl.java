@@ -6,9 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import tw.bjn.pg.flows.DispatchAndProcessEventFlow;
-import tw.bjn.pg.interfaces.event.EventDispatcher;
-import tw.bjn.pg.interfaces.event.EventQueueManager;
-import tw.bjn.pg.interfaces.flows.Flow;
+import tw.bjn.pg.event.queue.EventQueueManager;
+import tw.bjn.pg.flows.Flow;
 
 import javax.annotation.PostConstruct;
 import java.util.concurrent.ExecutorService;

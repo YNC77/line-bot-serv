@@ -4,7 +4,7 @@ import com.linecorp.bot.model.event.Event;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import tw.bjn.pg.interfaces.event.EventQueueManager;
+
 import javax.annotation.PostConstruct;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;

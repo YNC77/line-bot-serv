@@ -5,10 +5,9 @@ import com.linecorp.bot.model.event.Event;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import tw.bjn.pg.interfaces.event.EventHandler;
-import tw.bjn.pg.interfaces.event.HandlerContainer;
-import tw.bjn.pg.interfaces.flows.Flow;
-import tw.bjn.pg.interfaces.utils.ILineBotUtils;
+import tw.bjn.pg.handlers.EventHandler;
+import tw.bjn.pg.container.HandlerContainer;
+import tw.bjn.pg.utils.LineBotUtils;
 
 import java.util.Optional;
 
@@ -16,11 +15,11 @@ import java.util.Optional;
 @Component
 public class DispatchAndProcessEventFlow implements Flow {
 
-    protected ILineBotUtils lineBotUtils;
+    protected LineBotUtils lineBotUtils;
     protected HandlerContainer handlerContainer;
 
     @Autowired
-    DispatchAndProcessEventFlow(HandlerContainer handlerContainer, ILineBotUtils lineBotUtils) {
+    DispatchAndProcessEventFlow(HandlerContainer handlerContainer, LineBotUtils lineBotUtils) {
         this.handlerContainer = handlerContainer;
         this.lineBotUtils = lineBotUtils;
     }
