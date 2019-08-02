@@ -17,7 +17,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 
 @Slf4j
-@Profile("!test")
+@Profile("heroku")
 @Component
 public class LineBotUtils implements ILineBotUtils{
 

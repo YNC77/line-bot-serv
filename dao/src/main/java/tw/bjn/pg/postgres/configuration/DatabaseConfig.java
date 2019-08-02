@@ -1,6 +1,6 @@
-package tw.bjn.pg.configurations;
+package tw.bjn.pg.postgres.configuration;
 
-import org.apache.commons.dbcp2.BasicDataSource;
+import org.springframework.boot.jdbc.DataSourceBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -9,7 +9,7 @@ import javax.sql.DataSource;
 import java.net.URI;
 import java.net.URISyntaxException;
 
-@Profile("!test")
+@Profile("heroku")
 @Configuration
 public class DatabaseConfig {
 
@@ -21,12 +21,11 @@ public class DatabaseConfig {
         String password = dbUri.getUserInfo().split(":")[1];
         String dbUrl = "jdbc:postgresql://" + dbUri.getHost() + ':' + dbUri.getPort() + dbUri.getPath();
 
-        BasicDataSource basicDataSource = new BasicDataSource();
-        basicDataSource.setUrl(dbUrl);
-        basicDataSource.setUsername(username);
-        basicDataSource.setPassword(password);
-        basicDataSource.setDriverClassName("");
-        return basicDataSource;
+        return DataSourceBuilder.create()
+                .url(dbUrl)
+                .username(username)
+                .password(password)
+                .build();
     }
 
 }

@@ -7,9 +7,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import tw.bjn.pg.annotations.LineEventHandler;
 import tw.bjn.pg.calculator.Calculator;
-import tw.bjn.pg.dao.Database;
 
 import tw.bjn.pg.interfaces.event.EventHandler;
+import tw.bjn.pg.postgres.Database;
 import tw.bjn.pg.utils.MsgUtils;
 import tw.bjn.pg.utils.YamlReader;
 
@@ -25,7 +25,7 @@ import java.util.Random;
 public class TextEventHandler extends EventHandler<MessageEvent<TextMessageContent>> {
 
     private MsgUtils msgUtils;
-    private Database testDatabase;
+    private Database testDatabase; // TODO: use repository directly
     private Calculator calculator;
     private List<String> quotations = Collections.emptyList();
 
