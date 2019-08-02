@@ -4,21 +4,18 @@ line.bot:
   handler.path: /callback
 
 event.handler:
-  queue.capacity: 1024
-  thread.count: 4
+  queue.capacity: 8
+  thread.count: 2
 
 logging:
   level:
     ROOT: INFO
     tw.bjn.pg: DEBUG
-
-
-spring:
-  datasource:
-    url: ${JDBC_DATABASE_URL}
-    username: ${JDBC_DATABASE_USERNAME}
-    password: ${JDBC_DATABASE_PASSWORD}
-
   pattern:
     console: '%d{"yyyy:MM:dd HH:mm:ss,SSS"} [%5p] [%t] \(%F:%M:%L\) %msg%n'
 
+#spring:
+#  datasource:
+#    url: ${JDBC_DATABASE_URL}
+#    username: ${JDBC_DATABASE_USERNAME}
+#    password: ${JDBC_DATABASE_PASSWORD}

@@ -4,8 +4,8 @@ line.bot:
   handler.path: /callback
 
 event.handler:
-  queue.capacity: 1024
-  thread.count: 4
+  queue.capacity: 8
+  thread.count: 2
 
 logging:
   level:
