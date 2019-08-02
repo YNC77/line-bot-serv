@@ -49,6 +49,6 @@ subprojects {
     }
 
     task stage(type: GradleBuild) {
-        tasks = ['clean', 'build']
+        tasks = ['clean', 'assemble']
     }
 }
