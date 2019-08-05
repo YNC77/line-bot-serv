@@ -46,11 +46,12 @@ public class Addicting implements Skill {
                             .body(Box.builder()
                                     .layout(FlexLayout.VERTICAL)
                                     .contents(Collections.singletonList(
-                                            Text.builder().wrap(true).text(item.getTitle()).build())).build())
-                            .footer(
-                                    Box.builder()
-                                            .layout(FlexLayout.VERTICAL)
-                                            .contents(Collections.singletonList(Button.builder().height(Button.ButtonHeight.SMALL).style(Button.ButtonStyle.PRIMARY).action(a).build())).build())
+                                            Text.builder().wrap(true).text(item.getTitle())
+                                                    .action(a).build())).build())
+//                            .footer(
+//                                    Box.builder()
+//                                            .layout(FlexLayout.VERTICAL)
+//                                            .contents(Collections.singletonList(Button.builder().height(Button.ButtonHeight.SMALL).style(Button.ButtonStyle.PRIMARY).action(a).build())).build())
                             .build());
             if (++ count >= 10) {
                 log.warn("items more than 10, dropping");
