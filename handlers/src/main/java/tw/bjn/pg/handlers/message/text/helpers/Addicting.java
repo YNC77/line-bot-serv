@@ -59,9 +59,10 @@ public class Addicting implements Skill {
                             .text(item.getTitle())
                             .weight(Text.TextWeight.BOLD)
                             .action(a)
+                            .flex(1)
                             .build());
 
-            if (bodies.size() >= 5) {
+            if (bodies.size() >= 7) {
                 bubbles.add(
                     Bubble.builder()
                             .body(Box.builder()
@@ -73,26 +74,6 @@ public class Addicting implements Skill {
                 );
                 bodies = null;
             }
-
-//            bubbleBuilder.body(Box.builder()
-//                    .spacing(FlexMarginSize.XL)
-//                    .layout(FlexLayout.VERTICAL)
-//                    .contents(Collections.singletonList(
-//                            Text.builder()
-//                                    .wrap(true)
-//                                    .text(item.getTitle())
-//                                    .weight(Text.TextWeight.BOLD)
-//                                    .action(a)
-//                                    .build()
-//                    ))
-//                    .build())
-//
-//                            .footer(
-//                                    Box.builder()
-//                                            .layout(FlexLayout.VERTICAL)
-//                                            .contents(Collections.singletonList(Button.builder().height(Button.ButtonHeight.SMALL).style(Button.ButtonStyle.PRIMARY).action(a).build())).build())
-//                    .build();
-
         }
         return builder.altText("ptt-latest").contents(Carousel.builder().contents(bubbles).build()).build();
     }
