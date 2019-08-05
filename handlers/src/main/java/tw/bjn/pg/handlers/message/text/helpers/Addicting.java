@@ -5,12 +5,11 @@ import com.linecorp.bot.model.event.MessageEvent;
 import com.linecorp.bot.model.event.message.TextMessageContent;
 import com.linecorp.bot.model.message.FlexMessage;
 import com.linecorp.bot.model.message.Message;
-import com.linecorp.bot.model.message.flex.component.Box;
-import com.linecorp.bot.model.message.flex.component.Button;
-import com.linecorp.bot.model.message.flex.component.Text;
+import com.linecorp.bot.model.message.flex.component.*;
 import com.linecorp.bot.model.message.flex.container.Bubble;
 import com.linecorp.bot.model.message.flex.container.Carousel;
 import com.linecorp.bot.model.message.flex.unit.FlexLayout;
+import com.linecorp.bot.model.message.flex.unit.FlexMarginSize;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -38,27 +37,64 @@ public class Addicting implements Skill {
         List<PttItem> items = ptt.getLatest();
         List<Bubble> bubbles = new ArrayList<>();
         FlexMessage.FlexMessageBuilder builder = FlexMessage.builder();
-        int count = 0;
+
+        List<FlexComponent> bodies = null;
+
         for (PttItem item : items) {
+
             URIAction a = new URIAction("read", item.getUrl(), null);
-            bubbles.add(
+
+            if (bodies == null)
+                bodies = new ArrayList<>();
+            else
+                bodies.add(
+                        Separator.builder()
+                                .margin(FlexMarginSize.XXL)
+                                .build()
+                );
+
+            bodies.add(
+                    Text.builder()
+                            .wrap(true)
+                            .text(item.getTitle())
+                            .weight(Text.TextWeight.BOLD)
+                            .action(a)
+                            .build());
+
+            if (bodies.size() >= 5) {
+                bubbles.add(
                     Bubble.builder()
                             .body(Box.builder()
+                                    .spacing(FlexMarginSize.XL)
                                     .layout(FlexLayout.VERTICAL)
-                                    .contents(Collections.singletonList(
-                                            Text.builder().wrap(true).text(item.getTitle())
-                                                    .action(a).build())).build())
+                                    .contents(bodies)
+                                    .build()
+                            ).build()
+                );
+                bodies = null;
+            }
+
+//            bubbleBuilder.body(Box.builder()
+//                    .spacing(FlexMarginSize.XL)
+//                    .layout(FlexLayout.VERTICAL)
+//                    .contents(Collections.singletonList(
+//                            Text.builder()
+//                                    .wrap(true)
+//                                    .text(item.getTitle())
+//                                    .weight(Text.TextWeight.BOLD)
+//                                    .action(a)
+//                                    .build()
+//                    ))
+//                    .build())
+//
 //                            .footer(
 //                                    Box.builder()
 //                                            .layout(FlexLayout.VERTICAL)
 //                                            .contents(Collections.singletonList(Button.builder().height(Button.ButtonHeight.SMALL).style(Button.ButtonStyle.PRIMARY).action(a).build())).build())
-                            .build());
-            if (++ count >= 10) {
-                log.warn("items more than 10, dropping");
-                break;
-            }
+//                    .build();
+
         }
-        return builder.altText("ptt latest").contents(Carousel.builder().contents(bubbles).build()).build();
+        return builder.altText("ptt-latest").contents(Carousel.builder().contents(bubbles).build()).build();
     }
 
     @Override
