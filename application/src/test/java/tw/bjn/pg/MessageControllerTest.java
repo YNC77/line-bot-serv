@@ -52,4 +52,14 @@ public class MessageControllerTest extends ControllerTest{
         String response = api.callback(json, signature);
         // TODO: validation
     }
+
+    @Test
+    public void tsetp() throws InterruptedException {
+        String jsn = requestFactory.createMessageRequest(
+                new TextMessageContent("msg-id", "@ptt"));
+        String sgnature = requestFactory.getBotSignature(jsn.getBytes());
+        api.callback(jsn, sgnature);
+
+        Thread.sleep(10000);
+    }
 }

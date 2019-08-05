@@ -9,10 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import tw.bjn.pg.annotations.LineEventHandler;
 
 import tw.bjn.pg.handlers.EventHandler;
-import tw.bjn.pg.handlers.message.text.helpers.Accounting;
-import tw.bjn.pg.handlers.message.text.helpers.Blaming;
-import tw.bjn.pg.handlers.message.text.helpers.Calculating;
-import tw.bjn.pg.handlers.message.text.helpers.Skill;
+import tw.bjn.pg.handlers.message.text.helpers.*;
 
 import javax.annotation.PostConstruct;
 import java.util.Comparator;
@@ -35,9 +32,12 @@ public class TextEventHandler extends EventHandler<MessageEvent<TextMessageConte
     @Autowired
     Blaming blaming;
 
+    @Autowired
+    Addicting addicting;
+
     @PostConstruct
     public void init() {
-        skills = Lists.newArrayList(calculating, accounting, blaming);
+        skills = Lists.newArrayList(addicting, calculating, accounting, blaming);
     }
 
     @Override
