@@ -45,7 +45,7 @@ public class Addicting implements Skill {
                             .contents(Collections.singletonList(Button.builder().action(a).build())).build())
                             .build());
         }
-        return builder.contents(Carousel.builder().contents(bubbles).build()).build();
+        return builder.altText("ptt latest").contents(Carousel.builder().contents(bubbles).build()).build();
     }
 
     @Override
