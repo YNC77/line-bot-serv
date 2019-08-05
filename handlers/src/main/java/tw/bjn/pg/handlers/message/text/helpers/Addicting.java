@@ -11,6 +11,7 @@ import com.linecorp.bot.model.message.flex.component.Text;
 import com.linecorp.bot.model.message.flex.container.Bubble;
 import com.linecorp.bot.model.message.flex.container.Carousel;
 import com.linecorp.bot.model.message.flex.unit.FlexLayout;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import tw.bjn.pg.ptt.Ptt;
@@ -20,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+@Slf4j
 @Component
 public class Addicting implements Skill {
 
@@ -36,6 +38,7 @@ public class Addicting implements Skill {
         List<PttItem> items = ptt.getLatest();
         List<Bubble> bubbles = new ArrayList<>();
         FlexMessage.FlexMessageBuilder builder = FlexMessage.builder();
+        int count = 0;
         for (PttItem item : items) {
             URIAction a = new URIAction("go", item.getUrl(), null);
             bubbles.add(
@@ -49,6 +52,10 @@ public class Addicting implements Skill {
                                             .layout(FlexLayout.VERTICAL)
                                             .contents(Collections.singletonList(Button.builder().style(Button.ButtonStyle.PRIMARY).action(a).build())).build())
                             .build());
+            if (++ count >= 10) {
+                log.warn("items more than 10, dropping");
+                break;
+            }
         }
         return builder.altText("ptt latest").contents(Carousel.builder().contents(bubbles).build()).build();
     }
