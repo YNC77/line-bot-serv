@@ -40,17 +40,17 @@ public class Addicting implements Skill {
         FlexMessage.FlexMessageBuilder builder = FlexMessage.builder();
         int count = 0;
         for (PttItem item : items) {
-            URIAction a = new URIAction("go", item.getUrl(), null);
+            URIAction a = new URIAction("read", item.getUrl(), null);
             bubbles.add(
                     Bubble.builder()
                             .body(Box.builder()
                                     .layout(FlexLayout.VERTICAL)
                                     .contents(Collections.singletonList(
-                                            Text.builder().text(item.getTitle()).build())).build())
+                                            Text.builder().wrap(true).text(item.getTitle()).build())).build())
                             .footer(
                                     Box.builder()
                                             .layout(FlexLayout.VERTICAL)
-                                            .contents(Collections.singletonList(Button.builder().style(Button.ButtonStyle.PRIMARY).action(a).build())).build())
+                                            .contents(Collections.singletonList(Button.builder().height(Button.ButtonHeight.SMALL).style(Button.ButtonStyle.PRIMARY).action(a).build())).build())
                             .build());
             if (++ count >= 10) {
                 log.warn("items more than 10, dropping");
