@@ -213,13 +213,12 @@ public class Addicting implements Skill {
         return Box.builder()
                 .layout(FlexLayout.VERTICAL)
                 .spacing(FlexMarginSize.MD)
-//                .flex(0)
+                .action(new URIAction("read", item.getUrl(), null))
                 .contents(Lists.newArrayList(
                         Box.builder()
                                 .flex(0)
                                 .layout(FlexLayout.HORIZONTAL)
                                 .spacing(FlexMarginSize.MD)
-                                .action(new URIAction("read", item.getUrl(), null))
                                 .contents(Lists.newArrayList(
                                         Text.builder()
                                                 .text(item.getDate())
