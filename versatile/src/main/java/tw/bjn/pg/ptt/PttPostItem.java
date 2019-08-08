@@ -5,7 +5,7 @@ import lombok.Data;
 
 @Data
 @Builder
-public class PttItem {
+public class PttPostItem {
     String title;
     String url;
     String author;

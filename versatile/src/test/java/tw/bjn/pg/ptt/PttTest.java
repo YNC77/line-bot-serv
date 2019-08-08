@@ -8,7 +8,15 @@ public class PttTest {
     public void test() {
         Ptt p = new Ptt();
         p.init();
-        PttResult result = p.getLatest();
+        PttResult result = p.fetchPttBoard("Gossiping", "");
+        System.out.println(result);
+    }
+
+    @Test
+    public void getHotBoards() {
+        Ptt p = new Ptt();
+        p.init();
+        PttResult result = p.fetchHotBoards();
         System.out.println(result);
     }
 }

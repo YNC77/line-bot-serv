@@ -10,7 +10,9 @@ import java.util.regex.Pattern;
 @Data
 @Builder
 public class PttResult {
-    private List<PttItem> pttItemList;
+    // TODO: separate different result
+    private List<PttBoardItem> pttBoardItems;
+    private List<PttPostItem> pttItemList;
     private String board;
     private String oldestUrl;
     private String prevPageUrl;

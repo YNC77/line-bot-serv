@@ -17,6 +17,7 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 
 import javax.annotation.PostConstruct;
 import java.io.IOException;
@@ -49,10 +50,12 @@ public class Ptt {
     }
 
     private String createUrlByBoardAndIndex(String board, String index) {
+        // TODO: URL generator?
         StringBuilder builder = new StringBuilder();
-        builder.append(PTT_BASE_URL);
-        builder.append("/bbs/");
-        builder.append(board);
+        builder.append(PTT_BASE_URL)
+                .append("/bbs");
+        if (!StringUtils.isEmpty(board))
+            builder.append("/").append(board);
         builder.append("/index");
         if (!index.isEmpty()) // supposed to be numeric
             builder.append(index);
@@ -60,35 +63,45 @@ public class Ptt {
         return builder.toString();
     }
 
-    public PttResult getLatest() {
-        return fetchFromPttWeb("Gossiping", "");
-    }
-
-    public PttResult fetchFromPttWeb(String board, String index) {
+    private String fetchFromPttWeb(String board, String index) {
         try (CloseableHttpClient httpClient = createHttpClient()) {
             HttpGet g = new HttpGet(createUrlByBoardAndIndex(board, index));
             HttpResponse r = httpClient.execute(g);
             HttpEntity entity = r.getEntity();
             String html = EntityUtils.toString(entity);
             log.debug(html);
-            PttResult.PttResultBuilder builder = PttResult.builder().board(board);
-            Document doc = Jsoup.parse(html);
-            List<PttItem> items = parseItem(doc);
-            if (!CollectionUtils.isEmpty(items)) {
-                builder.pttItemList(items);
-            }
-            List<String> navs = parseNavigation(doc);
-            if (navs.size() == 4) {
-                builder.oldestUrl(navs.get(0));
-                builder.prevPageUrl(navs.get(1));
-                builder.nextPageUrl(navs.get(2));
-                builder.latestUrl(navs.get(3));
-            }
-            return builder.build();
+            return html;
         } catch (IOException e) {
             log.error("failed to get entry", e);
-            return null;
+            throw new RuntimeException("failed to fetch ptt data.", e);
         }
+    }
+
+    public PttResult fetchHotBoards() {
+        String html = fetchFromPttWeb("", "");
+        Document doc = Jsoup.parse(html);
+        List<PttBoardItem> boards = parseBoardItems(doc);
+        return PttResult.builder()
+                .pttBoardItems(boards)
+                .build();
+    }
+
+    public PttResult fetchPttBoard(String board, String index) {
+        String html = fetchFromPttWeb(board, index);
+        PttResult.PttResultBuilder builder = PttResult.builder().board(board);
+        Document doc = Jsoup.parse(html);
+        List<PttPostItem> items = parsePostItems(doc);
+        if (!CollectionUtils.isEmpty(items)) {
+            builder.pttItemList(items);
+        }
+        List<String> navs = parseNavigation(doc);
+        if (navs.size() == 4) {
+            builder.oldestUrl(navs.get(0));
+            builder.prevPageUrl(navs.get(1));
+            builder.nextPageUrl(navs.get(2));
+            builder.latestUrl(navs.get(3));
+        }
+        return builder.build();
     }
 
     private List<String> parseNavigation(Document doc) {
@@ -103,8 +116,23 @@ public class Ptt {
                 .collect(Collectors.toList());
     }
 
-    private List<PttItem> parseItem(Document doc) {
-        List<PttItem> result = new ArrayList<>();
+    private List<PttBoardItem> parseBoardItems(Document doc) {
+        List<PttBoardItem> result = new ArrayList<>();
+        for (Element el : doc.select("div.b-ent")) {
+            result.add(
+                    PttBoardItem.builder()
+                            .name(el.selectFirst("div.board-name").text())
+                            .popularity(el.selectFirst("div.board-nuser").text())
+                            .clazz(el.selectFirst("div.board-class").text())
+                            .title(el.selectFirst("div.board-title").text())
+                            .build()
+            );
+        }
+        return result;
+    }
+
+    private List<PttPostItem> parsePostItems(Document doc) {
+        List<PttPostItem> result = new ArrayList<>();
         Element posts = doc.selectFirst("div.r-list-container");
         for (Element el : posts.children()) {
             if (el.is("div.r-list-sep"))
@@ -130,7 +158,7 @@ public class Ptt {
                 }
 
                 if (title != null && url != null) {
-                    result.add(new PttItem(title, PTT_BASE_URL+url, author, date, reply));
+                    result.add(new PttPostItem(title, PTT_BASE_URL+url, author, date, reply));
                 }
             }
         }

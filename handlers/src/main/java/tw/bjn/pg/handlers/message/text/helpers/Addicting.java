@@ -15,11 +15,14 @@ import com.linecorp.bot.model.message.flex.unit.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 import tw.bjn.pg.ptt.Ptt;
-import tw.bjn.pg.ptt.PttItem;
+import tw.bjn.pg.ptt.PttBoardItem;
+import tw.bjn.pg.ptt.PttPostItem;
 import tw.bjn.pg.ptt.PttResult;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 @Slf4j
@@ -55,7 +58,7 @@ public class Addicting implements Skill {
 
         if (command.equals(COMMAND_KEYWORD)) {
             // TODO: show hot boards, /bbs/index.html
-            // return;
+            return parseResult(ptt.fetchHotBoards());
         } else {
             // TODO: redesign arguments
             String [] args = command.substring(COMMAND_KEYWORD.length() + 1).split(" ");
@@ -66,19 +69,119 @@ public class Addicting implements Skill {
             }
         }
 
-
-        PttResult result = ptt.fetchFromPttWeb(board, index);
+        PttResult result = ptt.fetchPttBoard(board, index);
         return parseResult(result);
     }
 
     private Message parseResult(PttResult result) {
-        List<PttItem> items = result.getPttItemList();
+        if (!CollectionUtils.isEmpty(result.getPttItemList()))
+            return createMessageFromBoardContent(result);
+        else if (!CollectionUtils.isEmpty(result.getPttBoardItems()))
+            return createMessageFromBoardList(result);
+        log.warn("No result to parse, going to return 'null' message");
+        return null;
+    }
+
+    private Message createMessageFromBoardList(PttResult result) {
+        List<PttBoardItem> items = result.getPttBoardItems();
         List<Bubble> bubbles = new ArrayList<>();
         FlexMessage.FlexMessageBuilder builder = FlexMessage.builder();
 
         List<FlexComponent> bodies = null;
 
-        for (PttItem item : items) {
+        for (PttBoardItem item : items) {
+            if (bodies == null)
+                bodies = new ArrayList<>();
+            else
+                bodies.add(separator());
+
+            bodies.add(
+                    Box.builder()
+                            .layout(FlexLayout.HORIZONTAL)
+                            .spacing(FlexMarginSize.MD)
+                            .contents(
+                                    Collections.singletonList(
+                                            Box.builder()
+                                                    .layout(FlexLayout.VERTICAL)
+                                                    .spacing(FlexMarginSize.MD)
+                                                    .action(new MessageAction("toBoard", COMMAND_KEYWORD + " " + item.getName()))
+                                                    .contents(
+                                                            Lists.newArrayList(
+                                                                    Box.builder()
+                                                                            .layout(FlexLayout.HORIZONTAL)
+                                                                            .spacing(FlexMarginSize.MD)
+                                                                            .contents(
+                                                                                    Lists.newArrayList(
+                                                                                            Text.builder()
+                                                                                                    .text(item.getName())
+                                                                                                    .color(TITLE_COLOR)
+                                                                                                    .flex(0)
+                                                                                                    .build(),
+                                                                                            separator(),
+                                                                                            Text.builder()
+                                                                                                    .text(item.getPopularity())
+                                                                                                    .color(TITLE_COLOR)
+                                                                                                    .build(),
+                                                                                            separator(),
+                                                                                            Text.builder()
+                                                                                                    .text(item.getClazz())
+                                                                                                    .flex(0)
+                                                                                                    .color(TITLE_COLOR)
+                                                                                                    .build()
+                                                                                    )
+                                                                            )
+                                                                            .build(),
+                                                                    Text.builder()
+                                                                            .color(SUBTITLE_COLOR)
+                                                                            .text(item.getTitle())
+                                                                            .build()
+                                                            )
+                                                    )
+                                                    .build()
+                                    )
+                            )
+                            .build()
+            );
+
+            if (bodies.size() >= 12) {
+                bubbles.add(
+                        Bubble.builder()
+                                .styles(BubbleStyles.builder()
+                                        .body(
+                                                BubbleStyles.BlockStyle.builder()
+                                                        .backgroundColor(BACKGROUND_COLOR)
+                                                        .build()
+                                        )
+                                        .build())
+                                .body(
+                                        Box.builder()
+                                                .layout(FlexLayout.VERTICAL)
+                                                .spacing(FlexMarginSize.MD)
+                                                .contents(bodies)
+                                                .build()
+                                )
+                                .build()
+                );
+                bodies = null;
+            }
+
+            if (bubbles.size() >= 10) {
+                log.warn("maximum bubble count: 10, dropping remained");
+                break;
+            }
+        }
+
+        return builder.altText(COMMAND_KEYWORD).contents(Carousel.builder().contents(bubbles).build()).build();
+    }
+
+    private Message createMessageFromBoardContent(PttResult result) {
+        List<PttPostItem> items = result.getPttItemList();
+        List<Bubble> bubbles = new ArrayList<>();
+        FlexMessage.FlexMessageBuilder builder = FlexMessage.builder();
+
+        List<FlexComponent> bodies = null;
+
+        for (PttPostItem item : items) {
             URIAction a = new URIAction("read", item.getUrl(), null);
 
             if (bodies == null)
@@ -137,18 +240,18 @@ public class Addicting implements Skill {
 
             if (bodies.size() >= 9) {
                 bubbles.add(
-                    Bubble.builder()
-                            .styles(BubbleStyles.builder()
-                                    .body(BubbleStyles.BlockStyle.builder()
-                                            .backgroundColor(BACKGROUND_COLOR)
-                                            .build())
-                                    .build())
-                            .body(Box.builder()
-                                    .spacing(FlexMarginSize.MD)
-                                    .layout(FlexLayout.VERTICAL)
-                                    .contents(bodies)
-                                    .build()
-                            ).build()
+                        Bubble.builder()
+                                .styles(BubbleStyles.builder()
+                                        .body(BubbleStyles.BlockStyle.builder()
+                                                .backgroundColor(BACKGROUND_COLOR)
+                                                .build())
+                                        .build())
+                                .body(Box.builder()
+                                        .spacing(FlexMarginSize.MD)
+                                        .layout(FlexLayout.VERTICAL)
+                                        .contents(bodies)
+                                        .build()
+                                ).build()
                 );
                 bodies = null;
             }
@@ -203,7 +306,7 @@ public class Addicting implements Skill {
                                     .contents(lastBubbleItems)
                                     .build())
                             .build());
-        return builder.altText("@ptt").contents(Carousel.builder().contents(bubbles).build()).build();
+        return builder.altText(COMMAND_KEYWORD).contents(Carousel.builder().contents(bubbles).build()).build();
     }
 
     @Override
