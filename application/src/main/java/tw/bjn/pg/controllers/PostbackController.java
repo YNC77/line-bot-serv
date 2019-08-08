@@ -1,5 +1,7 @@
 package tw.bjn.pg.controllers;
 
+import com.linecorp.bot.model.event.PostbackEvent;
+import com.linecorp.bot.spring.boot.annotation.EventMapping;
 import com.linecorp.bot.spring.boot.annotation.LineMessageHandler;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,4 +15,10 @@ public class PostbackController extends EnqueueController {
     public PostbackController(EnqueueFlow flow) {
         super(flow);
     }
+
+    @EventMapping
+    public void handlePostEvent(PostbackEvent event) {
+        processEvent(event);
+    }
+
 }

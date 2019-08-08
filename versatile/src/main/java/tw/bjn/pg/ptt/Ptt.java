@@ -48,18 +48,30 @@ public class Ptt {
         return HttpClientBuilder.create().setDefaultCookieStore(cookieStore).build();
     }
 
-    public PttResult getLatest() {
-        return getBoardFrom("Gossiping", null);
+    private String createUrlByBoardAndIndex(String board, String index) {
+        StringBuilder builder = new StringBuilder();
+        builder.append(PTT_BASE_URL);
+        builder.append("/bbs/");
+        builder.append(board);
+        builder.append("/index");
+        if (!index.isEmpty()) // supposed to be numeric
+            builder.append(index);
+        builder.append(".html");
+        return builder.toString();
     }
 
-    public PttResult getBoardFrom(String board, Integer index) {
+    public PttResult getLatest() {
+        return fetchFromPttWeb("Gossiping", "");
+    }
+
+    public PttResult fetchFromPttWeb(String board, String index) {
         try (CloseableHttpClient httpClient = createHttpClient()) {
-            HttpGet g = new HttpGet(PTT_BASE_URL+"/bbs/Gossiping/index.html");
+            HttpGet g = new HttpGet(createUrlByBoardAndIndex(board, index));
             HttpResponse r = httpClient.execute(g);
             HttpEntity entity = r.getEntity();
             String html = EntityUtils.toString(entity);
             log.debug(html);
-            PttResult.PttResultBuilder builder = PttResult.builder();
+            PttResult.PttResultBuilder builder = PttResult.builder().board(board);
             Document doc = Jsoup.parse(html);
             List<PttItem> items = parseItem(doc);
             if (!CollectionUtils.isEmpty(items)) {
@@ -113,7 +125,7 @@ public class Ptt {
 
                 entity = el.selectFirst("div.meta");
                 if (entity != null) {
-                    date = entity.selectFirst("div.date").text();
+                    date = entity.selectFirst("div.date").text().trim();
                     author = entity.selectFirst("div.author").text();
                 }
 
