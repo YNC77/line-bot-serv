@@ -1,11 +1,14 @@
 package tw.bjn.pg.ptt;
 
-import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 
 @Data
-@AllArgsConstructor
+@Builder
 public class PttItem {
     String title;
     String url;
+    String author;
+    String date;
+    String reply;
 }

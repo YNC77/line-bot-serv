@@ -8,6 +8,7 @@ public class PttTest {
     public void test() {
         Ptt p = new Ptt();
         p.init();
-        p.getLatest();
+        PttResult result = p.getLatest();
+        System.out.println(result);
     }
 }
