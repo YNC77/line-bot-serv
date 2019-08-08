@@ -61,7 +61,7 @@ public class Addicting implements Skill {
             String [] args = command.substring(COMMAND_KEYWORD.length() + 1).split(" ");
             board = args[0];
 
-            if (args.length > 2) {
+            if (args.length > 1) {
                 index = args[1];
             }
         }
