@@ -138,7 +138,7 @@ public class Ptt {
             if (el.is("div.r-list-sep"))
                 break;
             if (el.is("div.r-ent")) {
-                String author = null, url = null, title = null, date = null, reply = "0";
+                String author = null, url = null, title = null, date = null, reply = " ";
 
 //                Element entity = el.selectFirst("div.title");
                 Element entity = el.selectFirst("a");

@@ -16,13 +16,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.NumberUtils;
+import org.springframework.util.StringUtils;
 import tw.bjn.pg.ptt.Ptt;
 import tw.bjn.pg.ptt.PttBoardItem;
 import tw.bjn.pg.ptt.PttPostItem;
 import tw.bjn.pg.ptt.PttResult;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 @Slf4j
@@ -35,6 +36,16 @@ public class Addicting implements Skill {
     private final String SUBTITLE_COLOR = "#bbbbbb";
     private final String SEPARATOR_COLOR = "#a0a0a0";
 
+    private final String REPLY_COUNT_1_9 = "#00cc00";
+    private final String REPLY_COUNT_10_99 = "#ffff66";
+    private final String REPLY_EXPLODE = "#ff0000";
+
+    private final int MAX_PO_PER_BUBBLE = 6 + 5;
+    private final int MAX_BOARD_PER_BUBBLE = 8 + 7; // rows + separators
+    private final int MAX_BUBBLE_COUNT = 10;
+
+    private final Separator separator = Separator.builder().color(SEPARATOR_COLOR).build();
+
     @Autowired
     private Ptt ptt;
 
@@ -43,30 +54,23 @@ public class Addicting implements Skill {
         return event.getMessage().getText().startsWith(COMMAND_KEYWORD);
     }
 
-    private Separator separator() {
-        return Separator.builder()
-                .color(SEPARATOR_COLOR)
-                .build();
-    }
-
     @Override
     public Message perform(MessageEvent<TextMessageContent> event) {
         String command = event.getMessage().getText().trim();
 
-        String board = "Gossiping";
-        String index = "";
 
         if (command.equals(COMMAND_KEYWORD)) {
             // TODO: show hot boards, /bbs/index.html
             return parseResult(ptt.fetchHotBoards());
-        } else {
-            // TODO: redesign arguments
-            String [] args = command.substring(COMMAND_KEYWORD.length() + 1).split(" ");
-            board = args[0];
+        }
 
-            if (args.length > 1) {
-                index = args[1];
-            }
+        // TODO: redesign arguments
+        String [] args = command.substring(COMMAND_KEYWORD.length() + 1).split(" ");
+        String board = args[0];
+        String index = "";
+
+        if (args.length > 1) {
+            index = args[1];
         }
 
         PttResult result = ptt.fetchPttBoard(board, index);
@@ -93,79 +97,16 @@ public class Addicting implements Skill {
             if (bodies == null)
                 bodies = new ArrayList<>();
             else
-                bodies.add(separator());
+                bodies.add(separator);
 
-            bodies.add(
-                    Box.builder()
-                            .layout(FlexLayout.HORIZONTAL)
-                            .spacing(FlexMarginSize.MD)
-                            .contents(
-                                    Collections.singletonList(
-                                            Box.builder()
-                                                    .layout(FlexLayout.VERTICAL)
-                                                    .spacing(FlexMarginSize.MD)
-                                                    .action(new MessageAction("toBoard", COMMAND_KEYWORD + " " + item.getName()))
-                                                    .contents(
-                                                            Lists.newArrayList(
-                                                                    Box.builder()
-                                                                            .layout(FlexLayout.HORIZONTAL)
-                                                                            .spacing(FlexMarginSize.MD)
-                                                                            .contents(
-                                                                                    Lists.newArrayList(
-                                                                                            Text.builder()
-                                                                                                    .text(item.getName())
-                                                                                                    .color(TITLE_COLOR)
-                                                                                                    .flex(0)
-                                                                                                    .build(),
-                                                                                            separator(),
-                                                                                            Text.builder()
-                                                                                                    .text(item.getPopularity())
-                                                                                                    .color(TITLE_COLOR)
-                                                                                                    .build(),
-                                                                                            separator(),
-                                                                                            Text.builder()
-                                                                                                    .text(item.getClazz())
-                                                                                                    .flex(0)
-                                                                                                    .color(TITLE_COLOR)
-                                                                                                    .build()
-                                                                                    )
-                                                                            )
-                                                                            .build(),
-                                                                    Text.builder()
-                                                                            .color(SUBTITLE_COLOR)
-                                                                            .text(item.getTitle())
-                                                                            .build()
-                                                            )
-                                                    )
-                                                    .build()
-                                    )
-                            )
-                            .build()
-            );
+            bodies.add(genRowOfBoard(item));
 
-            if (bodies.size() >= 12) {
-                bubbles.add(
-                        Bubble.builder()
-                                .styles(BubbleStyles.builder()
-                                        .body(
-                                                BubbleStyles.BlockStyle.builder()
-                                                        .backgroundColor(BACKGROUND_COLOR)
-                                                        .build()
-                                        )
-                                        .build())
-                                .body(
-                                        Box.builder()
-                                                .layout(FlexLayout.VERTICAL)
-                                                .spacing(FlexMarginSize.MD)
-                                                .contents(bodies)
-                                                .build()
-                                )
-                                .build()
-                );
+            if (bodies.size() >= MAX_BOARD_PER_BUBBLE) {
+                bubbles.add(rowsToBubble(bodies));
                 bodies = null;
             }
 
-            if (bubbles.size() >= 10) {
+            if (bubbles.size() >= MAX_BUBBLE_COUNT) {
                 log.warn("maximum bubble count: 10, dropping remained");
                 break;
             }
@@ -174,139 +115,168 @@ public class Addicting implements Skill {
         return builder.altText(COMMAND_KEYWORD).contents(Carousel.builder().contents(bubbles).build()).build();
     }
 
+    private Box genRowOfBoard(PttBoardItem item) {
+        return Box.builder()
+                .layout(FlexLayout.VERTICAL)
+                .spacing(FlexMarginSize.MD)
+                .action(new MessageAction("toBoard", COMMAND_KEYWORD + " " + item.getName()))
+                .contents(Lists.newArrayList(
+                        Box.builder()
+                                .layout(FlexLayout.HORIZONTAL)
+                                .spacing(FlexMarginSize.MD)
+                                .contents(Lists.newArrayList(
+                                        Text.builder()
+                                                .text(item.getName())
+                                                .color(TITLE_COLOR)
+                                                .flex(0)
+                                                .build(),
+                                        separator,
+                                        Text.builder()
+                                                .text(item.getPopularity())
+                                                .color(TITLE_COLOR)
+                                                .build(),
+                                        separator,
+                                        Text.builder()
+                                                .text(item.getClazz())
+                                                .flex(0)
+                                                .align(FlexAlign.END)
+                                                .color(TITLE_COLOR)
+                                                .build()))
+                                .build(),
+                        Text.builder()
+                                .color(SUBTITLE_COLOR)
+                                .text(item.getTitle())
+                                .build()))
+                .build();
+    }
+
     private Message createMessageFromBoardContent(PttResult result) {
         List<PttPostItem> items = result.getPttItemList();
         List<Bubble> bubbles = new ArrayList<>();
         FlexMessage.FlexMessageBuilder builder = FlexMessage.builder();
 
-        List<FlexComponent> bodies = null;
+        List<FlexComponent> bodies = new ArrayList<>();
 
+        int maxItemCount = MAX_BUBBLE_COUNT * MAX_PO_PER_BUBBLE - 1; // reserved one for manipulation
+
+        int counter = 0;
         for (PttPostItem item : items) {
-            URIAction a = new URIAction("read", item.getUrl(), null);
-
-            if (bodies == null)
-                bodies = new ArrayList<>();
+            bodies.add(genRowOfPost(item));
+            ++ counter;
+            if (++ counter < MAX_PO_PER_BUBBLE)
+                bodies.add(separator);
             else
-                bodies.add(separator());
-
-            Box box = Box.builder()
-                    .layout(FlexLayout.VERTICAL)
-                    .spacing(FlexMarginSize.MD)
-                    .contents(
-                            Lists.newArrayList(
-                                    Box.builder()
-                                            .flex(1)
-                                            .layout(FlexLayout.HORIZONTAL)
-                                            .spacing(FlexMarginSize.MD)
-                                            .contents(
-                                                    Lists.newArrayList(
-                                                            Text.builder()
-                                                                    .text(item.getDate())
-                                                                    .size(FlexFontSize.SM)
-                                                                    .align(FlexAlign.CENTER)
-                                                                    .flex(0)
-                                                                    .color(SUBTITLE_COLOR)
-                                                                    .build(),
-                                                            separator(),
-                                                            Text.builder()
-                                                                    .text(item.getReply())
-                                                                    .size(FlexFontSize.SM)
-                                                                    .align(FlexAlign.CENTER)
-                                                                    .flex(0)
-                                                                    .color(SUBTITLE_COLOR)
-                                                                    .build(),
-                                                            separator(),
-                                                            Text.builder()
-                                                                    .text(item.getAuthor())
-                                                                    .size(FlexFontSize.SM)
-                                                                    .align(FlexAlign.CENTER)
-                                                                    .color(SUBTITLE_COLOR)
-                                                                    .build()
-                                                    )
-                                            )
-                                            .build(),
-                                    Text.builder()
-                                            .wrap(true)
-                                            .text(item.getTitle())
-                                            .weight(Text.TextWeight.BOLD)
-                                            .color(TITLE_COLOR)
-                                            .action(a)
-                                            .build()
-                            )
-                    )
-                    .build();
-
-            bodies.add(box);
-
-            if (bodies.size() >= 9) {
-                bubbles.add(
-                        Bubble.builder()
-                                .styles(BubbleStyles.builder()
-                                        .body(BubbleStyles.BlockStyle.builder()
-                                                .backgroundColor(BACKGROUND_COLOR)
-                                                .build())
-                                        .build())
-                                .body(Box.builder()
-                                        .spacing(FlexMarginSize.MD)
-                                        .layout(FlexLayout.VERTICAL)
-                                        .contents(bodies)
-                                        .build()
-                                ).build()
-                );
-                bodies = null;
-            }
-
-            if (bubbles.size() >= 9) {
-                log.warn("carousel message can only have 10 bubbles, reserve 1 for last page, dropping remained");
-                break;
-            }
+                counter = 0;
+            if (--maxItemCount <= 0) break;
         }
-        // build last page
+        bodies.add(genNavigationRow(result));
+
+        int to = 0;
+        while (to < bodies.size()) {
+            int from = to;
+            while (++to < bodies.size() && to - from < MAX_PO_PER_BUBBLE);
+            bubbles.add(rowsToBubble(bodies.subList(from, to)));
+        }
+
+        return builder.altText(COMMAND_KEYWORD).contents(Carousel.builder().contents(bubbles).build()).build();
+    }
+
+    private Box genNavigationRow(PttResult result) {
         List<FlexComponent> lastBubbleItems = new ArrayList<>();
         if (!result.getPrevPageUrl().isEmpty()) {
             lastBubbleItems.add(
                     Button.builder()
                             .style(Button.ButtonStyle.LINK)
-                            .gravity(FlexGravity.CENTER)
+                            .gravity(FlexGravity.BOTTOM)
+                            .height(Button.ButtonHeight.SMALL)
                             .flex(1)
-                            .action(new MessageAction("Prev", COMMAND_KEYWORD + " " + result.getBoard() + " " + result.getPrevIndex()))
+                            .action(new MessageAction("More", COMMAND_KEYWORD + " " + result.getBoard() + " " + result.getPrevIndex()))
                             .build()
             );
         }
-        if (!result.getNextPageUrl().isEmpty()) {
-            lastBubbleItems.add(
-                    Button.builder()
-                            .style(Button.ButtonStyle.LINK)
-                            .gravity(FlexGravity.CENTER)
-                            .flex(1)
-                            .action(new MessageAction("Next", COMMAND_KEYWORD + " " + result.getBoard() + " " + result.getNextIndex()))
-                            .build()
-            );
-        }
-        if (!result.getLatestUrl().isEmpty()) {
-            lastBubbleItems.add(
-                    Button.builder()
-                            .style(Button.ButtonStyle.LINK)
-                            .gravity(FlexGravity.CENTER)
-                            .flex(1)
-                            .action(new MessageAction("End", COMMAND_KEYWORD))
-                            .build()
-            );
-        }
-        if (!lastBubbleItems.isEmpty())
-            bubbles.add(
-                    Bubble.builder()
-                            .styles(BubbleStyles.builder()
-                                    .body(BubbleStyles.BlockStyle.builder()
-                                            .backgroundColor(BACKGROUND_COLOR)
-                                            .build())
-                                    .build())
-                            .body(Box.builder()
-                                    .layout(FlexLayout.VERTICAL)
-                                    .contents(lastBubbleItems)
-                                    .build())
-                            .build());
-        return builder.altText(COMMAND_KEYWORD).contents(Carousel.builder().contents(bubbles).build()).build();
+        lastBubbleItems.add(separator);
+        lastBubbleItems.add(Button.builder()
+                .style(Button.ButtonStyle.LINK)
+                .gravity(FlexGravity.BOTTOM)
+                .flex(1)
+                .height(Button.ButtonHeight.SMALL)
+                .action(new MessageAction("Home", COMMAND_KEYWORD))
+                .build());
+        return Box.builder()
+                .layout(FlexLayout.HORIZONTAL)
+                .spacing(FlexMarginSize.MD)
+                .contents(lastBubbleItems)
+                .build();
+    }
+
+    private Box genRowOfPost(PttPostItem item) {
+        return Box.builder()
+                .layout(FlexLayout.VERTICAL)
+                .spacing(FlexMarginSize.MD)
+//                .flex(0)
+                .contents(Lists.newArrayList(
+                        Box.builder()
+                                .flex(0)
+                                .layout(FlexLayout.HORIZONTAL)
+                                .spacing(FlexMarginSize.MD)
+                                .action(new URIAction("read", item.getUrl(), null))
+                                .contents(Lists.newArrayList(
+                                        Text.builder()
+                                                .text(item.getDate())
+                                                .size(FlexFontSize.SM)
+                                                .align(FlexAlign.CENTER)
+                                                .flex(0)
+                                                .color(SUBTITLE_COLOR)
+                                                .build(),
+                                        separator,
+                                        Text.builder()
+                                                .text(item.getReply())
+                                                .size(FlexFontSize.SM)
+                                                .align(FlexAlign.CENTER)
+                                                .color(replyColor(item.getReply()))
+                                                .weight(Text.TextWeight.BOLD)
+                                                .flex(0)
+                                                .build(),
+                                        separator,
+                                        Text.builder()
+                                                .text(item.getAuthor())
+                                                .size(FlexFontSize.SM)
+                                                .align(FlexAlign.START)
+                                                .color(SUBTITLE_COLOR)
+                                                .build()))
+                                .build(),
+                        Text.builder()
+                                .flex(1)
+                                .wrap(true)
+                                .text(item.getTitle())
+                                .color(TITLE_COLOR)
+                                .build()))
+                .build();
+    }
+
+    private String replyColor(String reply) {
+        if (reply.contains("X"))
+            return SUBTITLE_COLOR;
+        if (reply.matches("[1-9]"))
+            return REPLY_COUNT_1_9;
+        if (reply.matches("[1-9][0-9]"))
+            return REPLY_COUNT_10_99;
+        return REPLY_EXPLODE;
+    }
+
+    private Bubble rowsToBubble(List<FlexComponent> bodies) {
+        return Bubble.builder()
+                .styles(BubbleStyles.builder()
+                        .body(BubbleStyles.BlockStyle.builder()
+                                .backgroundColor(BACKGROUND_COLOR)
+                                .build())
+                        .build())
+                .body(Box.builder()
+                        .spacing(FlexMarginSize.MD)
+                        .layout(FlexLayout.VERTICAL)
+                        .contents(bodies)
+                        .build())
+                .build();
     }
 
     @Override
