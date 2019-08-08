@@ -32,6 +32,7 @@ import java.util.stream.Collectors;
 public class Ptt {
 
     private CookieStore cookieStore;
+    private CloseableHttpClient httpClient;
     private final String PTT_HOST = "www.ptt.cc";
     private final String URL_SCHEME = "https://";
     private final String PTT_BASE_URL = URL_SCHEME + PTT_HOST;
@@ -43,6 +44,7 @@ public class Ptt {
         cookie.setDomain(PTT_HOST);
         cookie.setAttribute(ClientCookie.DOMAIN_ATTR, "true");
         cookieStore.addCookie(cookie);
+        httpClient = createHttpClient();
     }
 
     private CloseableHttpClient createHttpClient() {
@@ -64,7 +66,7 @@ public class Ptt {
     }
 
     private String fetchFromPttWeb(String board, String index) {
-        try (CloseableHttpClient httpClient = createHttpClient()) {
+        try {
             HttpGet g = new HttpGet(createUrlByBoardAndIndex(board, index));
             HttpResponse r = httpClient.execute(g);
             HttpEntity entity = r.getEntity();
