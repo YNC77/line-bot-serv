@@ -51,26 +51,19 @@ public class Ptt {
     private String createUrlByBoardAndIndex(String board/*, String index*/) {
         // TODO: URL generator?
         StringBuilder builder = new StringBuilder();
-        builder.append(PttUtils.PTT_BASE_URL)
-                .append("/bbs");
+        builder.append(PttUtils.PTT_BASE_URL).append("/bbs");
         if (!StringUtils.isEmpty(board))
             builder.append("/").append(board);
-        builder.append("/index");
-//        if (!index.isEmpty()) // supposed to be numeric
-//            builder.append(index);
-        builder.append(".html");
+        builder.append("/index").append(".html");
         return builder.toString();
     }
 
     private String createSearchUrl(String board, String q/*, String page*/) {
         StringBuilder builder = new StringBuilder();
-        builder.append(PttUtils.PTT_BASE_URL)
-                .append("/bbs");
+        builder.append(PttUtils.PTT_BASE_URL).append("/bbs");
         if (!StringUtils.isEmpty(board))
             builder.append("/").append(board);
         builder.append("/search?q=").append(q);
-//        if (!StringUtils.isEmpty(page)) // supposed to be numeric
-//            builder.append("&page=").append(page);
         return builder.toString();
     }
 
@@ -107,25 +100,23 @@ public class Ptt {
 
     public PttResult fetchPttFromURL(String url) {
         String html = queryPttWebFromURL(url);
-        PttResult.PttResultBuilder builder = PttResult.builder();
-        Document doc = Jsoup.parse(html);
-        List<PttPostItem> items = parsePostItems(doc);
-        if (!CollectionUtils.isEmpty(items)) {
-            builder.pttItemList(items);
-        }
-        List<String> navs = parseNavigation(doc);
-        if (navs.size() == 4) {
-            builder.oldestUrl(navs.get(0));
-            builder.prevPageUrl(navs.get(1));
-            builder.nextPageUrl(navs.get(2));
-            builder.latestUrl(navs.get(3));
-        }
-        return builder.build();
+        return parsePttHtml(html, "");
     }
 
     public PttResult fetchPttBoard(String board) {
         String html = fetchFromPttWeb(board);
-        PttResult.PttResultBuilder builder = PttResult.builder().board(board);
+        return parsePttHtml(html, board);
+    }
+
+    public PttResult searchPttBoard(String board, String q) {
+        String html = searchFromPttWeb(board, q);
+        return parsePttHtml(html, board);
+    }
+
+    private PttResult parsePttHtml(String html, String board) {
+        PttResult.PttResultBuilder builder = PttResult.builder();
+        if (!StringUtils.isEmpty(board))
+            builder.board(board);
         Document doc = Jsoup.parse(html);
         List<PttPostItem> items = parsePostItems(doc);
         if (!CollectionUtils.isEmpty(items)) {
@@ -137,18 +128,6 @@ public class Ptt {
             builder.prevPageUrl(navs.get(1));
             builder.nextPageUrl(navs.get(2));
             builder.latestUrl(navs.get(3));
-        }
-        return builder.build();
-    }
-
-    public PttResult searchPttBoard(String board, String q) {
-        String html = searchFromPttWeb(board, q);
-        log.debug(html);
-        PttResult.PttResultBuilder builder = PttResult.builder().board(board);
-        Document doc = Jsoup.parse(html);
-        List<PttPostItem> items = parsePostItems(doc);
-        if (!CollectionUtils.isEmpty(items)) {
-            builder.pttItemList(items);
         }
         return builder.build();
     }
