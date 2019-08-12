@@ -8,7 +8,7 @@ public class PttTest {
     public void test() {
         Ptt p = new Ptt();
         p.init();
-        PttResult result = p.fetchPttBoard("Gossiping", "");
+        PttResult result = p.fetchPttBoard("Gossiping");
         System.out.println(result);
     }
 
@@ -17,6 +17,14 @@ public class PttTest {
         Ptt p = new Ptt();
         p.init();
         PttResult result = p.fetchHotBoards();
+        System.out.println(result);
+    }
+
+    @Test
+    public void searchBoard() {
+        Ptt p = new Ptt();
+        p.init();
+        PttResult result = p.searchPttBoard("Gossiping", "test");
         System.out.println(result);
     }
 }

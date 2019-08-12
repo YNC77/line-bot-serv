@@ -33,15 +33,12 @@ public class Ptt {
 
     private CookieStore cookieStore;
     private CloseableHttpClient httpClient;
-    private final String PTT_HOST = "www.ptt.cc";
-    private final String URL_SCHEME = "https://";
-    private final String PTT_BASE_URL = URL_SCHEME + PTT_HOST;
 
     @PostConstruct
     public void init() {
         cookieStore = new BasicCookieStore();
         BasicClientCookie cookie = new BasicClientCookie("over18", "1");
-        cookie.setDomain(PTT_HOST);
+        cookie.setDomain(PttUtils.PTT_HOST);
         cookie.setAttribute(ClientCookie.DOMAIN_ATTR, "true");
         cookieStore.addCookie(cookie);
         httpClient = createHttpClient();
@@ -51,23 +48,35 @@ public class Ptt {
         return HttpClientBuilder.create().setDefaultCookieStore(cookieStore).build();
     }
 
-    private String createUrlByBoardAndIndex(String board, String index) {
+    private String createUrlByBoardAndIndex(String board/*, String index*/) {
         // TODO: URL generator?
         StringBuilder builder = new StringBuilder();
-        builder.append(PTT_BASE_URL)
+        builder.append(PttUtils.PTT_BASE_URL)
                 .append("/bbs");
         if (!StringUtils.isEmpty(board))
             builder.append("/").append(board);
         builder.append("/index");
-        if (!index.isEmpty()) // supposed to be numeric
-            builder.append(index);
+//        if (!index.isEmpty()) // supposed to be numeric
+//            builder.append(index);
         builder.append(".html");
         return builder.toString();
     }
 
-    private String fetchFromPttWeb(String board, String index) {
+    private String createSearchUrl(String board, String q/*, String page*/) {
+        StringBuilder builder = new StringBuilder();
+        builder.append(PttUtils.PTT_BASE_URL)
+                .append("/bbs");
+        if (!StringUtils.isEmpty(board))
+            builder.append("/").append(board);
+        builder.append("/search?q=").append(q);
+//        if (!StringUtils.isEmpty(page)) // supposed to be numeric
+//            builder.append("&page=").append(page);
+        return builder.toString();
+    }
+
+    private String queryPttWebFromURL(String url) {
         try {
-            HttpGet g = new HttpGet(createUrlByBoardAndIndex(board, index));
+            HttpGet g = new HttpGet(url);
             HttpResponse r = httpClient.execute(g);
             HttpEntity entity = r.getEntity();
             String html = EntityUtils.toString(entity);
@@ -79,8 +88,16 @@ public class Ptt {
         }
     }
 
+    private String searchFromPttWeb(String board, String q) {
+        return queryPttWebFromURL(createSearchUrl(board, q));
+    }
+
+    private String fetchFromPttWeb(String board) {
+        return queryPttWebFromURL(createUrlByBoardAndIndex(board));
+    }
+
     public PttResult fetchHotBoards() {
-        String html = fetchFromPttWeb("", "");
+        String html = fetchFromPttWeb("");
         Document doc = Jsoup.parse(html);
         List<PttBoardItem> boards = parseBoardItems(doc);
         return PttResult.builder()
@@ -88,8 +105,26 @@ public class Ptt {
                 .build();
     }
 
-    public PttResult fetchPttBoard(String board, String index) {
-        String html = fetchFromPttWeb(board, index);
+    public PttResult fetchPttFromURL(String url) {
+        String html = queryPttWebFromURL(url);
+        PttResult.PttResultBuilder builder = PttResult.builder();
+        Document doc = Jsoup.parse(html);
+        List<PttPostItem> items = parsePostItems(doc);
+        if (!CollectionUtils.isEmpty(items)) {
+            builder.pttItemList(items);
+        }
+        List<String> navs = parseNavigation(doc);
+        if (navs.size() == 4) {
+            builder.oldestUrl(navs.get(0));
+            builder.prevPageUrl(navs.get(1));
+            builder.nextPageUrl(navs.get(2));
+            builder.latestUrl(navs.get(3));
+        }
+        return builder.build();
+    }
+
+    public PttResult fetchPttBoard(String board) {
+        String html = fetchFromPttWeb(board);
         PttResult.PttResultBuilder builder = PttResult.builder().board(board);
         Document doc = Jsoup.parse(html);
         List<PttPostItem> items = parsePostItems(doc);
@@ -106,6 +141,18 @@ public class Ptt {
         return builder.build();
     }
 
+    public PttResult searchPttBoard(String board, String q) {
+        String html = searchFromPttWeb(board, q);
+        log.debug(html);
+        PttResult.PttResultBuilder builder = PttResult.builder().board(board);
+        Document doc = Jsoup.parse(html);
+        List<PttPostItem> items = parsePostItems(doc);
+        if (!CollectionUtils.isEmpty(items)) {
+            builder.pttItemList(items);
+        }
+        return builder.build();
+    }
+
     private List<String> parseNavigation(Document doc) {
         Elements elements = doc.select("a.btn.wide");
         if (elements.isEmpty())
@@ -113,7 +160,7 @@ public class Ptt {
         return elements.stream()
                 .map(e -> {
                     String url = e.attr("href");
-                    return (url.isEmpty()) ? url : PTT_BASE_URL+url;
+                    return (url.isEmpty()) ? url : PttUtils.PTT_BASE_URL+url;
                 })
                 .collect(Collectors.toList());
     }
@@ -160,7 +207,7 @@ public class Ptt {
                 }
 
                 if (title != null && url != null) {
-                    result.add(new PttPostItem(title, PTT_BASE_URL+url, author, date, reply));
+                    result.add(new PttPostItem(title, PttUtils.PTT_BASE_URL+url, author, date, reply));
                 }
             }
         }
