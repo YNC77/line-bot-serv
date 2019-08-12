@@ -14,6 +14,7 @@ import com.linecorp.bot.model.message.flex.unit.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -147,7 +148,7 @@ public class PttUtils {
 
     private Box genNavigationRow(PttResult result) {
         List<FlexComponent> lastBubbleItems = new ArrayList<>();
-        if (!result.getPrevPageUrl().isEmpty()) {
+        if (!StringUtils.isEmpty(result.getPrevPageUrl())) {
             lastBubbleItems.add(
                     Button.builder()
                             .style(Button.ButtonStyle.LINK)
@@ -157,8 +158,8 @@ public class PttUtils {
                             .action(new PostbackAction("More", COMMAND_KEYWORD + " " + result.getPrevPageUrl()))
                             .build()
             );
+            lastBubbleItems.add(separator);
         }
-        lastBubbleItems.add(separator);
         lastBubbleItems.add(Button.builder()
                 .style(Button.ButtonStyle.LINK)
                 .gravity(FlexGravity.BOTTOM)
