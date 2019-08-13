@@ -35,9 +35,12 @@ public class TextEventHandler extends EventHandler<MessageEvent<TextMessageConte
     @Autowired
     Addicting addicting;
 
+    @Autowired
+    Translating translating;
+
     @PostConstruct
     public void init() {
-        skills = Lists.newArrayList(addicting, calculating, accounting, blaming);
+        skills = Lists.newArrayList(addicting, calculating, accounting, blaming, translating);
     }
 
     @Override
