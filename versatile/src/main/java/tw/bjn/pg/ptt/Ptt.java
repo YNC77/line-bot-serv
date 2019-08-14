@@ -1,23 +1,20 @@
 package tw.bjn.pg.ptt;
 
 import lombok.extern.slf4j.Slf4j;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.CookieStore;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.cookie.ClientCookie;
-import org.apache.http.impl.client.BasicCookieStore;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.cookie.BasicClientCookie;
-import org.apache.http.util.EntityUtils;
+import okhttp3.HttpUrl;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
+import tw.bjn.pg.ptt.client.PttClientFactory;
+import tw.bjn.pg.ptt.client.PttWebApi;
+import tw.bjn.pg.ptt.model.PttBoardItem;
+import tw.bjn.pg.ptt.model.PttPostItem;
+import tw.bjn.pg.ptt.model.PttResult;
 
 import javax.annotation.PostConstruct;
 import java.io.IOException;
@@ -31,87 +28,67 @@ import java.util.stream.Collectors;
 @Component
 public class Ptt {
 
-    private CookieStore cookieStore;
-    private CloseableHttpClient httpClient;
+    private PttWebApi pttWebApi;
+
+    private PttClientFactory pttClientFactory;
+
+    @Autowired
+    public Ptt (PttClientFactory pttClientFactory) {
+        this.pttClientFactory = pttClientFactory;
+    }
 
     @PostConstruct
     public void init() {
-        cookieStore = new BasicCookieStore();
-        BasicClientCookie cookie = new BasicClientCookie("over18", "1");
-        cookie.setDomain(PttUtils.PTT_HOST);
-        cookie.setAttribute(ClientCookie.DOMAIN_ATTR, "true");
-        cookieStore.addCookie(cookie);
-        httpClient = createHttpClient();
-    }
-
-    private CloseableHttpClient createHttpClient() {
-        return HttpClientBuilder.create().setDefaultCookieStore(cookieStore).build();
-    }
-
-    private String createUrlByBoardAndIndex(String board/*, String index*/) {
-        // TODO: URL generator?
-        StringBuilder builder = new StringBuilder();
-        builder.append(PttUtils.PTT_BASE_URL).append("/bbs");
-        if (!StringUtils.isEmpty(board))
-            builder.append("/").append(board);
-        builder.append("/index").append(".html");
-        return builder.toString();
-    }
-
-    private String createSearchUrl(String board, String q/*, String page*/) {
-        StringBuilder builder = new StringBuilder();
-        builder.append(PttUtils.PTT_BASE_URL).append("/bbs");
-        if (!StringUtils.isEmpty(board))
-            builder.append("/").append(board);
-        builder.append("/search?q=").append(q);
-        return builder.toString();
-    }
-
-    private String queryPttWebFromURL(String url) {
-        try {
-            HttpGet g = new HttpGet(url);
-            HttpResponse r = httpClient.execute(g);
-            HttpEntity entity = r.getEntity();
-            String html = EntityUtils.toString(entity);
-            log.debug(html);
-            return html;
-        } catch (IOException e) {
-            log.error("failed to get entry", e);
-            throw new RuntimeException("failed to fetch ptt data.", e);
-        }
-    }
-
-    private String searchFromPttWeb(String board, String q) {
-        return queryPttWebFromURL(createSearchUrl(board, q));
-    }
-
-    private String fetchFromPttWeb(String board) {
-        return queryPttWebFromURL(createUrlByBoardAndIndex(board));
+        pttWebApi = pttClientFactory.create();
     }
 
     public PttResult fetchHotBoards() {
-        String html = fetchFromPttWeb("");
-        Document doc = Jsoup.parse(html);
-        List<PttBoardItem> boards = parseBoardItems(doc);
-        return PttResult.builder()
-                .pttBoardItems(boards)
-                .build();
+        try {
+            String html = pttWebApi.getHotBoards().execute().body().string();
+            Document doc = Jsoup.parse(html);
+            List<PttBoardItem> boards = parseBoardItems(doc);
+            return PttResult.builder()
+                    .pttBoardItems(boards)
+                    .build();
+        } catch (IOException e) {
+            log.error("failed fetch", e);
+            return null;
+        }
     }
 
     public PttResult fetchPttFromURL(String url) {
-        String html = queryPttWebFromURL(url);
-        return parsePttHtml(html, "");
+        try {
+            String html = pttWebApi.fetchUrl(url).execute().body().string();
+            return parsePttHtml(html, null);
+        } catch (IOException e) {
+            log.error("fetch failed.", e);
+            return null;
+        }
     }
 
     public PttResult fetchPttBoard(String board) {
-        String html = fetchFromPttWeb(board);
-        return parsePttHtml(html, board);
+        try {
+            String html = pttWebApi.getPosts(board, "").execute().body().string();
+            return parsePttHtml(html, board);
+        } catch (IOException e) {
+            log.error("fetch failed.", e);
+            return null;
+        }
     }
 
     public PttResult searchPttBoard(String board, String q) {
-        String html = searchFromPttWeb(board, q);
-        return parsePttHtml(html, board);
+        try {
+            String html = pttWebApi.searchBoard(board, q, null).execute().body().string();
+            return parsePttHtml(html, board);
+        } catch (IOException e) {
+            log.error("fetch failed.", e);
+            return null;
+        }
     }
+
+    /*
+     maybe a Html to POJO converter
+     */
 
     private PttResult parsePttHtml(String html, String board) {
         PttResult.PttResultBuilder builder = PttResult.builder();
@@ -137,10 +114,7 @@ public class Ptt {
         if (elements.isEmpty())
             return Collections.emptyList();
         return elements.stream()
-                .map(e -> {
-                    String url = e.attr("href");
-                    return (url.isEmpty()) ? url : PttUtils.PTT_BASE_URL+url;
-                })
+                .map(e -> e.attr("href"))
                 .collect(Collectors.toList());
     }
 
@@ -168,7 +142,6 @@ public class Ptt {
             if (el.is("div.r-ent")) {
                 String author = null, url = null, title = null, date = null, reply = " ";
 
-//                Element entity = el.selectFirst("div.title");
                 Element entity = el.selectFirst("a");
                 if (entity != null) {
                     title = entity.text();
@@ -186,7 +159,19 @@ public class Ptt {
                 }
 
                 if (title != null && url != null) {
-                    result.add(new PttPostItem(title, PttUtils.PTT_BASE_URL+url, author, date, reply));
+                    result.add(
+                             PttPostItem.builder()
+                                     .title(title)
+                                     .author(author)
+                                     .date(date)
+                                     .reply(reply)
+                                     .url(new HttpUrl.Builder()
+                                             .scheme(PttUtils.URL_SCHEME)
+                                             .host(PttUtils.PTT_HOST)
+                                             .addPathSegments(url) // will have additional '/'
+                                             .build()
+                                             .toString())
+                                     .build());
                 }
             }
         }

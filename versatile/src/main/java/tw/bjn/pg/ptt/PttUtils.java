@@ -15,6 +15,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
+import tw.bjn.pg.ptt.model.PttBoardItem;
+import tw.bjn.pg.ptt.model.PttPostItem;
+import tw.bjn.pg.ptt.model.PttResult;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,8 +26,8 @@ import java.util.List;
 @Component
 public class PttUtils {
     public static final String PTT_HOST = "www.ptt.cc";
-    private static final String URL_SCHEME = "https://";
-    public static final String PTT_BASE_URL = URL_SCHEME + PTT_HOST;
+    public static final String URL_SCHEME = "https";
+//    public static final String PTT_BASE_URL = URL_SCHEME + PTT_HOST;
 
     public static final String COMMAND_KEYWORD = "@ptt";
     private static final String BACKGROUND_COLOR = "#080808";

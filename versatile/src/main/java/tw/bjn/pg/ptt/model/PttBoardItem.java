@@ -1,4 +1,4 @@
-package tw.bjn.pg.ptt;
+package tw.bjn.pg.ptt.model;
 
 import lombok.Builder;
 import lombok.Data;

@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import tw.bjn.pg.ptt.*;
+import tw.bjn.pg.ptt.model.PttResult;
 
 @Slf4j
 @Component

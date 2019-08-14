@@ -7,7 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import tw.bjn.pg.annotations.LineEventHandler;
 import tw.bjn.pg.handlers.EventHandler;
 import tw.bjn.pg.ptt.Ptt;
-import tw.bjn.pg.ptt.PttResult;
+import tw.bjn.pg.ptt.model.PttResult;
 import tw.bjn.pg.ptt.PttUtils;
 
 import java.util.Map;
