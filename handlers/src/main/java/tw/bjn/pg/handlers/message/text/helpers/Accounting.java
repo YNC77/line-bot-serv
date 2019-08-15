@@ -7,9 +7,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import tw.bjn.pg.postgres.Database;
+import tw.bjn.pg.postgres.model.ExpenseRecord;
 import tw.bjn.pg.utils.MsgUtils;
 
 import java.sql.Timestamp;
+import java.util.Comparator;
+import java.util.List;
 import java.util.regex.Pattern;
 
 @Slf4j
@@ -22,7 +25,7 @@ public class Accounting implements Skill {
     @Autowired
     MsgUtils msgUtils;
 
-    private Pattern p = Pattern.compile("^\\$[0-9]+");
+    private Pattern p = Pattern.compile("^\\$([0-9]+|\\?)");
 
     @Override
     public boolean isCapable(MessageEvent<TextMessageContent> event) {
@@ -34,8 +37,26 @@ public class Accounting implements Skill {
     @Override
     public Message perform(MessageEvent<TextMessageContent> event) {
         log.info("event: {}", event.getMessage().getText().substring(1));
-        int getPrice = Integer.parseInt(event.getMessage().getText().trim().substring(1));
-        boolean insertResult = database.insert(event.getSource().getUserId(), getPrice, Timestamp.from(event.getTimestamp()));
+
+        String numeric = event.getMessage().getText().trim().substring(1);
+        String uid = event.getSource().getUserId();
+
+        if ("?".equals(numeric)) {
+            int total = database.queryTotalPrice(uid);
+            return msgUtils.createTextMsg("sum: " + total);
+        }
+
+        if ("history".equals(numeric)) {
+            List<ExpenseRecord> expenseRecords = database.queryByUid(uid);
+            StringBuilder builder = new StringBuilder();
+            expenseRecords.stream()
+                    .sorted(Comparator.comparing(ExpenseRecord::getTime))
+                    .forEach(builder::append);
+            return msgUtils.createTextMsg(builder.toString());
+        }
+
+        int price = Integer.parseInt(numeric);
+        boolean insertResult = database.insert(uid, price, Timestamp.from(event.getTimestamp()));
         // TODO: error handling
         if (!insertResult)
             return null;

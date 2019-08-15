@@ -7,7 +7,7 @@ import tw.bjn.pg.postgres.model.ExpenseRecord;
 import tw.bjn.pg.postgres.repositories.TestTable;
 
 import java.sql.*;
-import java.util.Optional;
+import java.util.List;
 
 @Slf4j
 @Component
@@ -34,12 +34,14 @@ public class Database {
         }
     }
 
-    int queryTotalPrice(String uid) {
-        Optional<ExpenseRecord> optionalRecord = repository.findById(uid);
-        if (optionalRecord.isPresent())
-            return optionalRecord.get().getPrice();
+    public List<ExpenseRecord> queryByUid(String uid) {
+        return repository.findByUid(uid);
+    }
 
+    public int queryTotalPrice(String uid) {
+        List<ExpenseRecord> expenses = queryByUid(uid);
+        int total = expenses.stream().mapToInt(ExpenseRecord::getPrice).sum();
         log.warn("No query result for uid '{}'", uid);
-        return 0;
+        return total;
     }
 }
