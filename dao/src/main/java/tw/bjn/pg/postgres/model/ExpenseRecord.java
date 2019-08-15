@@ -12,8 +12,7 @@ public class ExpenseRecord {
     private Timestamp time;
 
     @Id
-    @SequenceGenerator(name="testtable_id_seq", sequenceName = "testtable_id_seq")
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @GeneratedValue(strategy = GenerationType.AUTO)
     public Integer getId() { return id; }
 
     public void setId(Integer id) { this.id = id; }
