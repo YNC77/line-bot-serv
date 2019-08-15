@@ -5,6 +5,7 @@ import retrofit2.Call;
 import retrofit2.http.GET;
 import retrofit2.http.Path;
 import retrofit2.http.Query;
+import retrofit2.http.Url;
 
 public interface PttWebApi {
 
@@ -17,6 +18,6 @@ public interface PttWebApi {
     @GET("bbs/{board}/search")
     Call<ResponseBody> searchBoard(@Path("board") String board, @Query("q") String q, @Query("page") String page);
 
-    @GET("{path}")
-    Call<ResponseBody> fetchUrl(@Path("path") String path);
+    @GET
+    Call<ResponseBody> fetchUrl(@Url String path);
 }

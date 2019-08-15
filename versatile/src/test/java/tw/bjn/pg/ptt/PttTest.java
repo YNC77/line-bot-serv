@@ -35,4 +35,14 @@ public class PttTest {
         PttResult result = p.searchPttBoard("Gossiping", "test");
         System.out.println(result);
     }
+
+    @Test
+    public void fetchFromUrl() {
+        PttClientFactory pttClientFactory = new PttClientFactory();
+        pttClientFactory.init();
+        Ptt p = new Ptt(pttClientFactory);
+        p.init();
+        PttResult result = p.fetchPttFromURL("/bbs/Gossiping/search?page=2&q=test");
+        System.out.println(result);
+    }
 }

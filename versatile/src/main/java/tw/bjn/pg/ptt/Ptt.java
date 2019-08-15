@@ -56,8 +56,11 @@ public class Ptt {
         }
     }
 
-    public PttResult fetchPttFromURL(String url) {
+    public PttResult fetchPttFromURL(String text) {
         try {
+            String url = text.trim();
+            if (url.startsWith("/"))
+                url = url.substring(1);
             String html = pttWebApi.fetchUrl(url).execute().body().string();
             return parsePttHtml(html, null);
         } catch (IOException e) {

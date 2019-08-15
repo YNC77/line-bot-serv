@@ -67,6 +67,12 @@ public class MessageControllerTest extends ControllerTest{
             String signature = requestFactory.getBotSignature(jsn.getBytes());
             api.callback(jsn, signature);
         }
+        {
+            String jsn = requestFactory.createMessageRequest(
+                    new TextMessageContent("msg-id", "@ptt Gossiping test"));
+            String signature = requestFactory.getBotSignature(jsn.getBytes());
+            api.callback(jsn, signature);
+        }
 
         Thread.sleep(10000);
     }

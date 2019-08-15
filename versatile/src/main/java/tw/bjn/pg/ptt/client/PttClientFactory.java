@@ -8,7 +8,7 @@ import retrofit2.Retrofit;
 import tw.bjn.pg.ptt.PttUtils;
 
 import javax.annotation.PostConstruct;
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -32,19 +32,21 @@ public class PttClientFactory {
 //                .readTimeout(10, TimeUnit.SECONDS)
                 .addInterceptor(loggingInterceptor)
                 .cookieJar(new CookieJar() {
+                    List<Cookie> cookies = new ArrayList<Cookie>() {{
+                            add(new Cookie.Builder()
+                                .domain(PttUtils.PTT_HOST)
+                                .name("over18")
+                                .value("1")
+                                .build());
+                    }};
                     @Override
                     public void saveFromResponse(HttpUrl url, List<Cookie> cookies) {
-                        //
+                        this.cookies.addAll(cookies);
                     }
 
                     @Override
                     public List<Cookie> loadForRequest(HttpUrl url) {
-                        return Collections.singletonList(
-                                new Cookie.Builder()
-                                        .domain(PttUtils.PTT_HOST)
-                                        .name("over18")
-                                        .value("1")
-                                        .build());
+                        return cookies;
                     }
                 })
                 .build();
