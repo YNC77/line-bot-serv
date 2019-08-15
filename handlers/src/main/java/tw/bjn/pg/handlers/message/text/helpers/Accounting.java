@@ -25,7 +25,7 @@ public class Accounting implements Skill {
     @Autowired
     MsgUtils msgUtils;
 
-    private Pattern p = Pattern.compile("^\\$([0-9]+|\\?)");
+    private Pattern p = Pattern.compile("^\\$([0-9]+|\\?|history)");
 
     @Override
     public boolean isCapable(MessageEvent<TextMessageContent> event) {
