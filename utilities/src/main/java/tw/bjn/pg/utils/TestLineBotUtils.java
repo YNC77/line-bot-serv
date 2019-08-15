@@ -2,6 +2,7 @@ package tw.bjn.pg.utils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.linecorp.bot.client.MessageContentResponse;
 import com.linecorp.bot.model.ReplyMessage;
 import com.linecorp.bot.model.message.Message;
 import com.linecorp.bot.model.objectmapper.ModelObjectMapper;
@@ -53,5 +54,11 @@ public class TestLineBotUtils implements LineBotUtils {
     public UserProfileResponse getUserProfile(String userId) {
         log.debug("get user id '{}'",userId);
         return new UserProfileResponse("Name", userId, "", "my status");
+    }
+
+    @Override
+    public MessageContentResponse getMessageContent(String messageId) {
+        log.debug("get message id '{}'", messageId);
+        return MessageContentResponse.builder().build();
     }
 }

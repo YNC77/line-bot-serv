@@ -1,6 +1,7 @@
 package tw.bjn.pg.utils;
 
 import com.linecorp.bot.client.LineMessagingClient;
+import com.linecorp.bot.client.MessageContentResponse;
 import com.linecorp.bot.model.PushMessage;
 import com.linecorp.bot.model.ReplyMessage;
 import com.linecorp.bot.model.message.Message;
@@ -53,6 +54,18 @@ public class HerokuLineBotUtils implements LineBotUtils {
             UserProfileResponse profile = profileFuture.join();
             log.info("get profile - {}", profile);
             return profile;
+        } catch (CancellationException | CompletionException e) {
+            log.error("Exception occur when pushing message.", e);
+            return null;
+        }
+    }
+
+    public MessageContentResponse getMessageContent(String messageId) {
+        try {
+            CompletableFuture<MessageContentResponse> contentResponseCompletableFuture = lineMessagingClient.getMessageContent(messageId);
+            MessageContentResponse messageContent = contentResponseCompletableFuture.join();
+            log.info("get message content - {}", messageContent);
+            return messageContent;
         } catch (CancellationException | CompletionException e) {
             log.error("Exception occur when pushing message.", e);
             return null;

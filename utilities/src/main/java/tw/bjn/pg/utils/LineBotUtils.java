@@ -1,5 +1,6 @@
 package tw.bjn.pg.utils;
 
+import com.linecorp.bot.client.MessageContentResponse;
 import com.linecorp.bot.model.ReplyMessage;
 import com.linecorp.bot.model.message.Message;
 import com.linecorp.bot.model.profile.UserProfileResponse;
@@ -12,4 +13,5 @@ public interface LineBotUtils {
     CompletableFuture<BotApiResponse> replyMessage(ReplyMessage replyMessage);
     CompletableFuture<BotApiResponse> replyMessage(String replyToken, Message message);
     UserProfileResponse getUserProfile(String userId);
+    MessageContentResponse getMessageContent(String messageId);
 }

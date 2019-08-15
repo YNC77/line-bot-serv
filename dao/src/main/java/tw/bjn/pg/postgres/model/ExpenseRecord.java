@@ -47,6 +47,6 @@ public class ExpenseRecord {
 
     @Override
     public String toString() {
-        return String.format("%s - $%d", time.toString(), price);
+        return String.format("[%s] $%d\n", time.toString(), price);
     }
 }
