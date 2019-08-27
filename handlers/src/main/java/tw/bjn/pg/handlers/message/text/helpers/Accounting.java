@@ -55,6 +55,14 @@ public class Accounting implements Skill {
             return msgUtils.createTextMsg(builder.toString());
         }
 
+        if ("clear".equals(numeric)) {
+
+        }
+
+        if ("delete".equals(numeric)) {
+
+        }
+
         int price = Integer.parseInt(numeric);
         boolean insertResult = database.insert(uid, price, Timestamp.from(event.getTimestamp()));
         // TODO: error handling
